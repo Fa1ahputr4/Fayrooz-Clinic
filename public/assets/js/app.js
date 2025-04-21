@@ -1,18 +1,21 @@
- // Simpan state sidebar di localStorage
- document.addEventListener('alpine:init', () => {
+document.addEventListener('alpine:init', () => {
     Alpine.store('sidebar', {
-        open: localStorage.getItem('sidebarOpen') === 'true' || window.innerWidth >= 1024,
+        open: localStorage.getItem('sidebarOpen') !== null 
+            ? localStorage.getItem('sidebarOpen') === 'true' 
+            : window.innerWidth >= 1024,
 
         toggle() {
-            this.open = !this.open
-            localStorage.setItem('sidebarOpen', this.open)
+            this.open = !this.open;
+            localStorage.setItem('sidebarOpen', this.open);
         }
-    })
-})
+    });
+});
 
-// Handle resize event
-window.addEventListener('resize', function() {
-    if (window.innerWidth >= 1024) {
-        Alpine.store('sidebar').open = true
-    }
-})
+document.documentElement.classList.add('no-transition');
+document.documentElement.classList.add('x-cloak');
+    window.addEventListener('load', () => {
+        document.documentElement.classList.remove('no-transition');
+        document.documentElement.classList.remove('x-cloak');
+    });
+
+    

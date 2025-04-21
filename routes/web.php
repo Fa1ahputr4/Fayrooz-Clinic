@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Livewire\UserManagement;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,5 +16,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware('auth');
+})->middleware('auth')->name('dashboard');
+// routes/web.php
+Route::get('/user', function () {
+    return view('user.index');
+})->middleware(middleware: 'auth');
+
 
