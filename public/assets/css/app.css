@@ -32,6 +32,18 @@
     overflow: hidden;
 }
 
+.submenu-text-hidden {
+    opacity: 0;
+    transform: translateX(-0.5rem);
+    width: 0;
+    overflow: hidden;
+}
+
+.submenu-text {
+    opacity: 1;
+    white-space: nowrap;
+}
+
 /* Konten utama */
 .main-content {
     margin-left: 16rem;
@@ -107,6 +119,11 @@
     border-radius: 50%;
     box-shadow: 35px 35px 0 10px #f3f4f6;
     pointer-events: none;
+    z-index: 1;
+}
+
+.active-link {
+    position: relative; /* Pastikan memiliki posisi relative */
 }
 
 .active-link::after {
@@ -120,4 +137,45 @@
     border-radius: 50%;
     box-shadow: 35px -35px 0 10px #f3f4f6;
     pointer-events: none;
+    z-index: 1;
 }
+
+[x-cloak] {
+    display: none !important;
+}
+
+.submenu {
+    position: absolute;
+    top: 0;
+    left: 100%; /* Pastikan dropdown berada di sebelah kanan menu */
+    z-index: 20; /* Pastikan berada di atas elemen lain */
+    display: none;
+}
+
+.submenu.open {
+    display: block;
+}
+
+.dataTables_length select {
+    width: auto !important;
+    min-width: 50px;
+  }
+  
+  #userTable thead th {
+    text-align: center !important;
+    vertical-align: middle !important;
+    display: table-cell;
+  }
+
+  /* Fix untuk DaisyUI */
+  .table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  /* Override DataTables */
+  .dataTable thead th {
+    text-align: center !important;
+  }
+
+  

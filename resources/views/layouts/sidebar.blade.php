@@ -1,61 +1,98 @@
-<aside class="sidebar bg-[#5e4a7e] text-white"
-    :class="{
-        'sidebar-collapsed': !sidebarOpen && window.innerWidth >= 1024,
-        'sidebar-open': mobileMenuOpen
-    }">
-    <div class="px-5 py-5.5 text-2xl font-bold border-b border-gray-700 flex items-center gap-3">
+<aside x-cloak class="sidebar bg-[#5e4a7e] text-white fixed top-0 left-0 h-full z-10"
+    :class="{ 'sidebar-collapsed': !$store.sidebar.open }">
+
+    <div class="px-5 py-[26px] text-2xl font-bold border-b border-gray-700 flex items-center gap-3">
         <!-- Logo -->
         <img src="{{ asset('images/fayrooz.png') }}" alt="Logo Klinik" class="h-10 w-10 object-cover rounded-full" />
 
         <!-- Teks Nama Klinik -->
-        <span class="menu-text transition-all duration-200" :class="!sidebarOpen && 'menu-text-hidden'">
+        <span class="menu-text transition-all duration-200" :class="!$store.sidebar.open && 'menu-text-hidden'">
             Fayrooz Clinic
         </span>
     </div>
 
+    @php
+        $user = auth()->user();
+        $role = $user->role;
+
+        $menus = collect(config('menu'))->filter(function ($menu) use ($role) {
+            return in_array($role, $menu['roles']) || $role === 'admin';
+        });
+    @endphp
+
     <nav class="mt-10 ml-3">
         <ul class="space-y-1">
-            <li class="relative">
-                <a href="/dashboard"
-                    class="nav-link flex items-center py-2.5 px-4 transition-all duration-200 rounded-l-full
-                    {{ request()->is('dashboard') ? 'bg-gray-100 text-[#6e5d94] font-semibold active-link' : 'hover:bg-[#6e5d94] hover:text-white' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span class="menu-text ml-3" :class="!sidebarOpen && 'menu-text-hidden'">Dashboard</span>
-                </a>
-            </li>
+           @foreach ($menus as $menu)
+    @php
+        // Cek apakah salah satu submenu aktif
+        $isSubmenuActive = false;
 
-            <li>
-                <a href="/user"
-                    class="nav-link flex items-center py-2.5 px-4 transition-all duration-200 rounded-l-full
-                    {{ request()->is('profile') ? 'bg-white text-[#6e5d94] font-semibold' : 'hover:bg-[#6e5d94] hover:text-white' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span class="menu-text ml-3" :class="!sidebarOpen && 'menu-text-hidden'">User</span>
-                </a>
-            </li>
+        if (isset($menu['submenu'])) {
+            foreach ($menu['submenu'] as $submenu) {
+                if (request()->is(trim($submenu['url'], '/'))) {
+                    $isSubmenuActive = true;
+                    break;
+                }
+            }
+        }
 
-            <li>
-                <a href="/settings"
-                    class="nav-link flex items-center py-2.5 px-4 transition-all duration-200 hover:bg-[#6e5d94] hover:text-white hover:rounded-l-[20px]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span class="menu-text ml-3" :class="!sidebarOpen && 'menu-text-hidden'">Settings</span>
-                </a>
-            </li>
+        // Tandai menu parent aktif jika:
+        // - URL utama aktif, atau
+        // - Salah satu submenu aktif
+        $isActive = request()->is(trim($menu['url'], '/')) || $isSubmenuActive;
+    @endphp
+
+    <li class="relative" x-data="{ open: {{ $isSubmenuActive ? 'true' : 'false' }} }">
+        <a href="{{ $menu['url'] === '' ? '#' : url($menu['url']) }}"
+            @if (isset($menu['submenu'])) @click.prevent="open = !open" @endif
+            class="nav-link flex items-center py-2.5 px-4 transition-all duration-200 rounded-l-full
+            {{ $isActive ? 'bg-gray-100 text-[#6e5d94] font-semibold active-link' : 'hover:bg-[#6e5d94] hover:text-white' }}">
+
+            <div class="w-6 h-6 flex items-center justify-center">
+                {!! $menu['icon'] !!}
+            </div>
+
+            <span class="menu-text ml-3" :class="!$store.sidebar.open && 'menu-text-hidden'">
+                {{ $menu['label'] }}
+            </span>
+
+            @if (isset($menu['submenu']))
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor"
+                    class="ml-auto transition-transform duration-300"
+                    :class="open ? 'rotate-0' : 'rotate-90'">
+                    <path d="M10 6l-4 4-4-4h8z" />
+                </svg>
+            @endif
+        </a>
+
+        @if (isset($menu['submenu']))
+            <ul x-show="open" x-transition
+                class="space-y-1 pl-1 mt-2 bg-white bg-opacity-10 shadow-lg rounded-lg mr-[13px]">
+                @foreach ($menu['submenu'] as $submenu)
+                    @php
+                        $submenuActive = request()->is(trim($submenu['url'], '/'));
+                    @endphp
+                    <li class="py-1">
+                        <a href="{{ $submenu['url'] }}"
+                            class="nav-link flex items-center gap-3 transition-all duration-200 px-3 py-1 mr-1
+                            {{ $submenuActive ? 'text-white font-bold border-2 rounded-lg border-opacity-20 border-white' : 'hover:bg-white hover:bg-opacity-20 hover:text-white rounded-lg' }}">
+                            <div class="w-6 h-6">
+                                {!! $submenu['icon'] !!}
+                            </div>
+                            <span class="submenu-text transition-all duration-200"
+                                :class="!$store.sidebar.open && 'submenu-text-hidden'">
+                                {{ $submenu['label'] }}
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </li>
+@endforeach
+
+
+
         </ul>
     </nav>
-
-    </div>
 </aside>

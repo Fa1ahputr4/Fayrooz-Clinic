@@ -1,8 +1,9 @@
 <header class="header bg-white shadow mt-5 mr-5 px-6 py-4 flex justify-between border-b border-gray-200 items-center rounded-t-[30px]">
     <div class="flex items-center">
-        <button @click="sidebarOpen = !sidebarOpen" 
-            class="p-1 rounded-full bg-[#6e5d94] text-white shadow-lg hover:bg-[#7f6da5] focus:outline-none"
-            :class="{ 'rotate-180': !sidebarOpen }">
+        <button @click="$store.sidebar.toggle()"
+        class="p-1 rounded-full bg-[#6e5d94] text-white shadow-lg hover:bg-[#7f6da5] focus:outline-none"
+        :class="{ 'rotate-180': !$store.sidebar.open }">
+
             
             <!-- Hamburger icon (strip 3) -->
             <svg x-show="!sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"

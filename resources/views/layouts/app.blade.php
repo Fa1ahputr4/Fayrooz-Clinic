@@ -1,18 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
+
+    <!-- Tailwind & App Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tambahan CSS lokal (jika ada style custom) -->
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-    <!-- Tambah ini di <head> -->
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- CDN Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+
+    @livewireStyles
+
 </head>
 
-<body class="bg-[#5e4a7e] min-h-screen flex flex-col" x-data="{ sidebarOpen: window.innerWidth >= 1024, mobileMenuOpen: false }"
-    @resize.window="sidebarOpen = window.innerWidth >= 1024">
+<body class="bg-[#5e4a7e] min-h-screen flex flex-col" x-data="{
+    sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? (window.innerWidth >= 1024)),
+    mobileMenuOpen: false
+}" x-init="$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', JSON.stringify(value)))"
+    @resize.window="sidebarOpen = window.innerWidth >= 1024" x-cloak>
 
     <!-- Overlay untuk mobile -->
     <div class="sidebar-overlay lg:hidden" :class="mobileMenuOpen && 'sidebar-overlay-visible'"
@@ -21,13 +37,15 @@
     <!-- Sidebar -->
     @include('layouts.sidebar')
 
-    <!-- Main Content -->
+    <!-- Main Content Wrapper -->
     <div class="flex-grow flex flex-col min-h-screen main-content"
-        :class="{ 'main-content-collapsed': !sidebarOpen && window.innerWidth >= 1024 }">
+        :class="{ 'main-content-collapsed': !$store.sidebar.open && window.innerWidth >= 1024 }">
+        <x-flash-message />
+
         <!-- Header -->
         @include('layouts.header')
 
-        <!-- Content -->
+        <!-- Page Content -->
         <main class="bg-gray-100 mr-5 flex-1 p-6">
             @yield('content')
         </main>
@@ -35,8 +53,17 @@
         <!-- Footer -->
         @include('layouts.footer')
     </div>
-
+    @if (session('status'))
+        <div class="alert alert-success">
+            {{ session('status') }}
+        </div>
+    @endif
+    @livewireScripts
+    <!-- Optional Custom JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    @stack('scripts')
 
 </body>
 
