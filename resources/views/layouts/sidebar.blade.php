@@ -1,6 +1,7 @@
 <aside x-cloak class="sidebar bg-[#5e4a7e] text-white fixed top-0 left-0 h-full z-10"
     :class="{ 'sidebar-collapsed': !$store.sidebar.open }">
 
+
     <div class="px-5 py-[26px] text-2xl font-bold border-b border-gray-700 flex items-center gap-3">
         <!-- Logo -->
         <img src="{{ asset('images/fayrooz.png') }}" alt="Logo Klinik" class="h-10 w-10 object-cover rounded-full" />
@@ -90,8 +91,6 @@
         @endif
     </li>
 @endforeach
-
-
 
         </ul>
     </nav>
