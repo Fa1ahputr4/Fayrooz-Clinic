@@ -36,7 +36,7 @@ return [
     
     [
         'label' => 'Layanan',
-        'url'   => 'settings',
+        'url'   => 'layanan',
         'icon'  => $icon['service'],
         'roles' => [], 
     ],

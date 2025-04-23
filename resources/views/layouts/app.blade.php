@@ -17,9 +17,6 @@
     <!-- CDN Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
-
     @livewireStyles
 
 </head>
@@ -61,7 +58,6 @@
     @livewireScripts
     <!-- Optional Custom JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     @stack('scripts')
 
