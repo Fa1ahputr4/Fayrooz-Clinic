@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\user;
 
 use Livewire\Component;
 use App\Models\User;
@@ -15,7 +15,7 @@ class UserManagement extends Component
 
     public $perPage = 10;
     public $search = '';
-    public $sortField = 'name';
+    public $sortField = 'created_at';
     public $sortDirection = 'asc';
     public $isModalOpen = false;
     public $isDeleteModalOpen = false;
@@ -25,11 +25,10 @@ class UserManagement extends Component
     public $name;
     public $username;
     public $email;
-    public $role = 'user';
+    public $role = "admin";
+    public $status = true;
     public $password;
     public $password_confirmation;
-
-    protected $listeners = ['refreshUsers' => '$refresh'];
 
     public function render()
     {
@@ -38,7 +37,7 @@ class UserManagement extends Component
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('username', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                        ->orWhere('id', 'like', '%' . $this->search . '%');
                 });
             })
             ->orderBy($this->sortField, $this->sortDirection)
@@ -52,11 +51,14 @@ class UserManagement extends Component
     public function updatingSearch()
     {
         $this->resetPage();
+        $this->closeModal();
     }
 
     public function updatingPerPage()
     {
+        $this->isModalOpen = false;
         $this->resetPage();
+        $this->closeModal();
     }
 
     public function openModal()
@@ -69,7 +71,7 @@ class UserManagement extends Component
     {
         $this->isModalOpen = false;
         $this->resetForm();
-        $this->resetErrorBag();
+        $this->resetErrorBag(); 
     }
 
     public function openDeleteModal($id)
@@ -94,6 +96,7 @@ class UserManagement extends Component
             'username',
             'email',
             'role',
+            'status',
             'password',
             'password_confirmation'
         ]);
@@ -108,7 +111,7 @@ class UserManagement extends Component
         $this->username = $user->username;
         $this->email = $user->email;
         $this->role = $user->role;
-
+        $this->status = $user->status === 'active';
         $this->isModalOpen = true;
     }
 
@@ -132,8 +135,9 @@ class UserManagement extends Component
             'username' => $this->username,
             'email' => $this->email,
             'role' => $this->role,
+            'status' => $this->status ? 'active' : 'non_active',
         ];
-
+                        
         if ($this->password) {
             $data['password'] = Hash::make($this->password);
         }
@@ -148,7 +152,6 @@ class UserManagement extends Component
         }
 
         $this->dispatch('flash-message', type: 'success', message: $message);
-
         $this->closeModal();
     }
 

@@ -12,7 +12,7 @@
     <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Manajemen User</h2>
-            <button wire:click="openModal"
+            <button wire:click.prevent="openModal"
                 class="bg-blue-500 hover:bg-blue-900 text-white px-3 py-2 rounded text-sm flex items-center">Tambah
                 Data</button>
         </div>
@@ -28,7 +28,7 @@
                     </select>
                 </div>
                 <div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari"
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="(ID,Nama,Username)"
                         class="input input-bordered w-full max-w-xs rounded-lg" />
                 </div>
             </div>
@@ -37,6 +37,16 @@
                 <table class="table w-full text-sm text-center border border-[#5e4a7e]">
                     <thead class="bg-[#3b82f6] bg-opacity-90 text-white">
                         <tr>
+                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('id')">
+                                ID
+                                @if ($sortField === 'id')
+                                    @if ($sortDirection === 'asc')
+                                        ↑
+                                    @else
+                                        ↓
+                                    @endif
+                                @endif
+                            </th>
                             <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('name')">
                                 Nama
                                 @if ($sortField === 'name')
@@ -47,8 +57,7 @@
                                     @endif
                                 @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('username')">
+                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('username')">
                                 Username
                                 @if ($sortField === 'username')
                                     @if ($sortDirection === 'asc')
@@ -78,63 +87,91 @@
                                     @endif
                                 @endif
                             </th>
+                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('role')">
+                                Status
+                                @if ($sortField === 'status')
+                                    @if ($sortDirection === 'asc')
+                                        ↑
+                                    @else
+                                        ↓
+                                    @endif
+                                @endif
+                            </th>
                             <th class="py-3 px-4 border border-[#5e4a7e]">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($users as $user)
+                        @forelse ($users as $index => $user)
                             <tr class="hover:bg-[#f3eaff] transition-all" wire:key="user-{{ $user->id }}">
+                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $user->id }}</td>
                                 <td class="py-2 px-4 border border-[#5e4a7e]">{{ $user->name }}</td>
                                 <td class="py-2 px-4 border border-[#5e4a7e]">{{ $user->username }}</td>
                                 <td class="py-2 px-4 border border-[#5e4a7e]">{{ $user->email }}</td>
                                 <td class="py-2 px-4 border border-[#5e4a7e]">
-                                    <span class="badge {{ $user->role === 'admin' ? 'badge-primary' : 'badge-ghost' }}">
-                                        {{ $user->role }}
+                                    @php
+                                        $roleColors = [
+                                            'admin' => 'bg-blue-500 text-white',
+                                            'apoteker' => 'bg-green-500 text-white',
+                                            'staff' => 'bg-yellow-400 text-black',
+                                            'dokter' => 'bg-purple-500 text-white',
+                                            'resepsionis' => 'bg-pink-500 text-white',
+                                        ];
+                                        $colorClass = $roleColors[$user->role] ?? 'bg-gray-300 text-black';
+                                    @endphp
+                                    <span class="px-2 py-1 text-xs rounded {{ $colorClass }}">
+                                        {{ ucfirst($user->role) }}
                                     </span>
                                 </td>
+                                
                                 <td class="py-2 px-4 border border-[#5e4a7e]">
+                                    @if ($user->status === 'active')
+                                        <span class="px-2 py-1 text-xs rounded bg-green-500 text-white">Aktif</span>
+                                    @elseif ($user->status === 'non_active')
+                                        <span class="px-2 py-1 text-xs rounded bg-red-500 text-white">Tidak Aktif</span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs rounded bg-gray-400 text-white">Status Tidak Dikenal</span>
+                                    @endif
+                                </td>
+                                                                <td class="py-2 px-4 border border-[#5e4a7e]">
                                     <div class="flex justify-center gap-2">
-                                        <!-- Tombol Edit -->
                                         <button wire:click="editUser({{ $user->id }})"
                                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
-
-                                        <!-- Tombol Delete -->
                                         <button wire:click="openDeleteModal({{ $user->id }})"
                                             class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                             title="Hapus">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
-
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-4 text-center text-gray-500">Tidak ada data ditemukan</td>
+                                <td colspan="7" class="py-4 text-center text-gray-500">Tidak ada data ditemukan</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+                
             </div>
 
-            <div class="mt-4" wire:ignore>
-                {{ $users->links('vendor.pagination.tailwind') }}
+            <div class="mt-4">
+                {{ $users->links('vendor.livewire.tailwind') }}
             </div>
         </div>
     </div>
 
     <!-- Modal Form -->
-    <x-modal wire:model="isModalOpen" title="{{ $userId ? 'Edit User' : 'Tambah User' }}">
+    <x-modal wire:model="isModalOpen" title="{{ $userId ? 'Edit User' : 'Tambah User' }}" wire:key="modal-{{ $userId }}">
         <form wire:submit.prevent="saveUser">
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>
                 <input type="text" wire:model="name" id="name"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 @error('name')
-                    <span class="text-red-500 text-xs">{{ $message }}</span>
+                    <span class="text-red-500 text-xs">{{ $message  }}</span>
                 @enderror
             </div>
 
@@ -186,6 +223,26 @@
                 <input type="password" wire:model="password_confirmation" id="password_confirmation"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
             </div>
+            <div x-data="{ status: @entangle('status') }" class="mb-4 flex items-center">
+                <label for="status" class="mr-4 text-sm font-medium text-gray-700">Status</label>
+            
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" x-model="status" id="status" class="sr-only peer">
+                    <div
+                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:bg-green-500 transition duration-300">
+                    </div>
+                    <div
+                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border rounded-full transition-all duration-300 peer-checked:translate-x-full peer-checked:border-white">
+                    </div>
+                </label>
+            
+                <span class="ml-3 text-sm font-medium"
+                    :class="{ 'text-green-600': status, 'text-red-600': !status }"
+                    x-text="status ? 'Aktif' : 'Tidak Aktif'">
+                </span>
+            </div>
+            
+            
 
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="submit"
