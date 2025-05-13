@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\layanan;
+namespace App\Livewire\Layanan;
 
 use App\Models\Layanan;
 use Livewire\Component;
@@ -9,7 +9,7 @@ use Livewire\WithPagination;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 
-class LayananMenu extends Component
+class LayananIndex extends Component
 {
     use WithPagination;
 
@@ -49,7 +49,7 @@ class LayananMenu extends Component
         return view('livewire.layanan.layanan-menu', [
             'services' => $services,
             'categories' => $categories
-        ]);
+        ])->extends('layouts.app');
     }
 
     public function updatingSearch()

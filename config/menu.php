@@ -9,24 +9,24 @@ return [
         'icon'  => $icon['dashboard'],
         'roles' => ['resepsionis', 'apoteker'], 
     ],
-    [
-        'label' => 'Pasien',
-        'url'   => 'da',
-        'icon'  => $icon['patient'],
-        'roles' => [], 
-    ],
-    [
-        'label' => 'Pendaftaran Pasien',
-        'url'   => 'settings',
-        'icon'  => $icon['registration-patient'],
-        'roles' => [], 
-    ],
-    [
-        'label' => 'Jurnal',
-        'url'   => 'settings',
-        'icon'  => $icon['journal'],
-        'roles' => [], 
-    ],
+    // [
+    //     'label' => 'Pasien',
+    //     'url'   => '#',
+    //     'icon'  => $icon['patient'],
+    //     'roles' => [], 
+    // ],
+    // [
+    //     'label' => 'Pendaftaran Pasien',
+    //     'url'   => '#s',
+    //     'icon'  => $icon['registration-patient'],
+    //     'roles' => [], 
+    // ],
+    // [
+    //     'label' => 'Jurnal',
+    //     'url'   => '#',
+    //     'icon'  => $icon['journal'],
+    //     'roles' => [], 
+    // ],
     [
         'label' => 'User Management',
         'url'   => 'user',
@@ -47,13 +47,29 @@ return [
         'roles' => [],
         'submenu' => [
             [
-                'label' => 'Obat',
-                'url' => 'dashboard',
+                'label' => 'Obat & Produk',
+                'url' => 'barang',
                 'icon' => $icon['drug'],
             ],
             [
-                'label' => 'Produk Kecantikan',
-                'url' => 'produk',
+                'label' => 'Rak',
+                'url' => 'rak',
+                'icon' => $icon['beauty-product'],
+            ],
+            [
+                'label' => 'Stok Rak',
+                'url' => 'stok-rak',
+                'icon' => $icon['beauty-product'],
+            ],
+            [
+                'label' => 'Barang Masuk',
+                'url' => 'barang-masuk',
+                'icon' => $icon['beauty-product'],
+            ],
+            
+            [
+                'label' => 'Barang Keluar',
+                'url' => 'barang-keluar',
                 'icon' => $icon['beauty-product'],
             ],
         ], 

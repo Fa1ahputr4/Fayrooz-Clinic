@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\user;
+namespace App\Livewire\User;
 
 use Livewire\Component;
 use App\Models\User;
@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class UserManagement extends Component
+class UserIndex extends Component
 {
     use WithPagination;
 
@@ -43,9 +43,9 @@ class UserManagement extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        return view('livewire.user-management', [
+        return view('livewire.user.user-management', [
             'users' => $users,
-        ]);
+        ])->extends('layouts.app');
     }
 
     public function updatingSearch()

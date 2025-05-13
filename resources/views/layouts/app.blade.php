@@ -5,17 +5,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
+    <link rel="icon" href="{{ asset('images/icon.png') }}" type="image/x-icon">
 
     <!-- Tailwind & App Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <link rel="stylesheet" href="{{ asset('assets/css/virtualselect.css') }}">
 
     <!-- Tambahan CSS lokal (jika ada style custom) -->
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
     <!-- CDN Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- jQuery Editable Select -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     @livewireStyles
 
@@ -50,17 +57,29 @@
         <!-- Footer -->
         @include('layouts.footer')
     </div>
+
     @if (session('status'))
         <div class="alert alert-success">
             {{ session('status') }}
         </div>
     @endif
-    @livewireScripts
+
+
     <!-- Optional Custom JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
 
-    @stack('scripts')
+    <script src="{{ asset('assets/js/virtualselect.js') }}"></script>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- jQuery (Harus dimuat sebelum plugin lainnya) -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    @livewireScripts
+
+    @stack('scripts')
+    
 </body>
 
 </html>
