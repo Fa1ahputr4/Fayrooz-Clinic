@@ -17,7 +17,7 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    
+
     <!-- CDN Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -44,7 +44,7 @@
     <!-- Main Content Wrapper -->
     <div class="flex-grow flex flex-col min-h-screen main-content"
         :class="{ 'main-content-collapsed': !$store.sidebar.open && window.innerWidth >= 1024 }">
-        <x-flash-message />
+        {{-- <x-flash-message /> --}}
 
         <!-- Header -->
         @include('layouts.header')
@@ -56,14 +56,14 @@
 
         <!-- Footer -->
         @include('layouts.footer')
+
+       @if (session('success') || session('error'))
+    <x-flash-message />
+@endif
+
+
+
     </div>
-
-    @if (session('status'))
-        <div class="alert alert-success">
-            {{ session('status') }}
-        </div>
-    @endif
-
 
     <!-- Optional Custom JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
@@ -71,7 +71,7 @@
     <script src="{{ asset('assets/js/virtualselect.js') }}"></script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
     <!-- jQuery (Harus dimuat sebelum plugin lainnya) -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
@@ -79,7 +79,7 @@
     @livewireScripts
 
     @stack('scripts')
-    
+
 </body>
 
 </html>

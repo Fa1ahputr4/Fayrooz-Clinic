@@ -9,12 +9,12 @@ return [
         'icon'  => $icon['dashboard'],
         'roles' => ['resepsionis', 'apoteker'], 
     ],
-    // [
-    //     'label' => 'Pasien',
-    //     'url'   => '#',
-    //     'icon'  => $icon['patient'],
-    //     'roles' => [], 
-    // ],
+    [
+        'label' => 'Pasien',
+        'url'   => 'pasien',
+        'icon'  => $icon['patient'],
+        'roles' => [], 
+    ],
     // [
     //     'label' => 'Pendaftaran Pasien',
     //     'url'   => '#s',
