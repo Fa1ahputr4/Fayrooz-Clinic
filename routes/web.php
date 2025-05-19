@@ -23,6 +23,18 @@ Route::get('/user', \App\Livewire\User\UserIndex::class)
     ->middleware('auth')
     ->name('user');
 
+Route::get('/pasien', \App\Livewire\Pasien\PasienIndex::class)
+    ->middleware('auth')
+    ->name('pasien');
+
+Route::get('/pasien/tambah', \App\Livewire\Pasien\PasienTambah::class)
+    ->middleware('auth')
+    ->name('pasien-tambah');
+
+Route::get('/pasien/edit/{id}', \App\Livewire\Pasien\PasienTambah::class)
+    ->middleware('auth')
+    ->name('pasien-edit');
+
 Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)
     ->middleware('auth')
     ->name('layanan');
@@ -43,7 +55,7 @@ Route::get('rak', \App\Livewire\Rak\RakIndex::class)
     ->middleware('auth')
     ->name('rak');
 
-Route::get('stok-rak', \App\Livewire\Rak\StokRakindex::class)
+Route::get('stok-rak', \App\Livewire\Rak\StokRakIndex::class)
     ->middleware('auth')
     ->name('stok-rak');
 
