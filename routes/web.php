@@ -35,6 +35,14 @@ Route::get('/pasien/edit/{id}', \App\Livewire\Pasien\PasienTambah::class)
     ->middleware('auth')
     ->name('pasien-edit');
 
+Route::get('/pendaftaran', \App\Livewire\Pendaftaran\PendaftaranIndex::class)
+    ->middleware('auth')
+    ->name('pendaftaran');
+
+Route::get('/antrian', \App\Livewire\Pendaftaran\AntrianIndex::class)
+    ->middleware('auth')
+    ->name('antrian');
+
 Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)
     ->middleware('auth')
     ->name('layanan');

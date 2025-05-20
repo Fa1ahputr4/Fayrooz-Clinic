@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pasien extends Model
 {
-    use SoftDeletes; 
+    use SoftDeletes;
 
     protected $fillable = [
         'nomor_rm',
@@ -28,4 +28,10 @@ class Pasien extends Model
         'status_pernikahan',
         'catatan'
     ];
+
+    // Di model Pasien.php
+    public function pendaftaran()
+    {
+        return $this->hasMany(Pendaftaran::class);
+    }
 }

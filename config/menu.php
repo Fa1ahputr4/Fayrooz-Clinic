@@ -15,12 +15,18 @@ return [
         'icon'  => $icon['patient'],
         'roles' => [], 
     ],
-    // [
-    //     'label' => 'Pendaftaran Pasien',
-    //     'url'   => '#s',
-    //     'icon'  => $icon['registration-patient'],
-    //     'roles' => [], 
-    // ],
+    [
+        'label' => 'Pendaftaran Pasien',
+        'url'   => 'pendaftaran',
+        'icon'  => $icon['registration-patient'],
+        'roles' => [], 
+    ],
+    [
+        'label' => 'Antrian Pasien',
+        'url'   => 'antrian',
+        'icon'  => $icon['registration-patient'],
+        'roles' => [], 
+    ],
     // [
     //     'label' => 'Jurnal',
     //     'url'   => '#',
