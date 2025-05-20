@@ -45,6 +45,7 @@
     <div class="flex-grow flex flex-col min-h-screen main-content"
         :class="{ 'main-content-collapsed': !$store.sidebar.open && window.innerWidth >= 1024 }">
         {{-- <x-flash-message /> --}}
+        <x-flash-message />
 
         <!-- Header -->
         @include('layouts.header')
@@ -57,11 +58,9 @@
         <!-- Footer -->
         @include('layouts.footer')
 
-       @if (session('success') || session('error'))
-    <x-flash-message />
-@endif
-
-
+        @if (session('success') || session('error'))
+            <x-session-flash-message />
+        @endif
 
     </div>
 
