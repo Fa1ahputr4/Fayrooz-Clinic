@@ -207,20 +207,21 @@
                 @enderror
             </div>
 
-            <div class="mb-4" wire:ignore>
+            <div class="mb-4">
                 <label for="satuan" class="block text-sm font-medium text-gray-700">Satuan</label>
-                <select name="satuan" id="satuan">
-                    <option value="">Pilih satuan</option>
-                    @foreach ($satuanOptions as $option)
-                        <option value="{{ $option }}" {{ $satuan === $option ? 'selected' : '' }}>
-                            {{ $option }}
-                        </option>
-                    @endforeach
-                </select>
+                <div wire:ignore>
+                    <select name="satuan" id="satuan" class="form-control">
+                        <option value="">Pilih satuan</option>
+                        @foreach ($satuanOptions as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 @error('satuan')
                     <span class="text-red-500 text-xs">{{ $message }}</span>
                 @enderror
             </div>
+
 
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="submit"
@@ -275,12 +276,16 @@
         });
 
         function initSelect2Barang() {
+
+            if ($.fn.select2 && $('#satuan').hasClass('select2-hidden-accessible')) {
+                $('#satuan').select2('destroy');
+            }
             $('#satuan').select2({
                 width: '100%',
-                tags: true, // Menambahkan fitur tags untuk memungkinkan inputan baru
-                placeholder: 'Pilih satuan atau ketik untuk menambah', // Placeholder
+                tags: true,
+                allowClear: true,
+                placeholder: 'Pilih satuan atau ketik untuk menambah',
                 createTag: function(params) {
-                    // Jika inputan baru tidak ada dalam pilihan, buat opsi baru
                     return {
                         id: params.term,
                         text: params.term
@@ -298,16 +303,37 @@
                 'align-items': 'center'
             });
 
-            $('#satuan').on('change', function(e) {
+            // Ambil nilai dari Livewire
+            const satuanFromLivewire = @this.get('satuan');
+
+            if (satuanFromLivewire) {
+                // Jika tidak ada di option, tambahkan
+                if ($('#satuan option[value="' + satuanFromLivewire + '"]').length === 0) {
+                    $('#satuan').append(new Option(satuanFromLivewire, satuanFromLivewire, true, true));
+                }
+
+                // Set nilai select2
+                $('#satuan').val(satuanFromLivewire).trigger('change');
+            }
+
+            // Sinkron ke Livewire saat berubah
+            $('#satuan').on('change', function() {
                 @this.set('satuan', $(this).val());
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("livewire:navigated", function() {
+            Livewire.on('editBarang', (data) => {
+                initSelect2Barang();
+            });
+        });
+
+        Livewire.on('tambahBarang', () => {
+            $('#satuan').val(null).trigger('change'); // ⬅️ Reset select2 ke kosong
             initSelect2Barang();
         });
 
-        document.addEventListener("livewire:navigated", function() {
+        Livewire.on('editBarang', (data) => {
             initSelect2Barang();
         });
     </script>

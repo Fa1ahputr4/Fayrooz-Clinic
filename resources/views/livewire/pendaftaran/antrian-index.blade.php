@@ -142,14 +142,22 @@
                                     <div class="flex justify-center gap-2">
                                         <button wire:click="editPendaftaran({{ $p->id }})"
                                             class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Edit">
+                                            title="Info">
                                             <i class="fas fa-info-circle"></i>
                                         </button>
-                                        <button wire:click="openDeleteModal({{ $p->id }})"
+                                        @if($p->status === 'diperiksa' && $p->layanan_id === 1 || $p->layanan_id === 1)
+                                        <a wire:navigate.hover href="{{ route('periksa-umum', ['id' => $p->id]) }}"
                                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Hapus">
+                                            title="Periksa Umum">
                                             <i class="fas fa-stethoscope"></i>
-                                        </button>
+                                        </a>
+                                        @else
+                                        <a href="{{ route('periksa-beautycare', ['id' => $p->id]) }}"
+                                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
+                                            title="Periksa Beautycare">
+                                            <i class="fas fa-stethoscope"></i>
+                                        </a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -217,7 +225,8 @@
                     <label for="tgl_kunjungan" class="block text-sm font-medium text-gray-700">Tanggal
                         Kunjungan</label>
                     <input type="date" wire:model="tgl_kunjungan" id="tgl_kunjungan"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" readonly>
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        disabled>
                     @error('tgl_kunjungan')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -226,7 +235,7 @@
                 <div>
                     <label for="jenis_pasien" class="block text-sm font-medium text-gray-700">Jenis Pasien</label>
                     <select wire:model.live="jenis_pasien" id="jenis_pasien"
-                        class="pointer-events-none mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        class="pointer-events-none mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
                         <option value="">-- Pilih Jenis Pasien --</option>
                         <option value="lama">Pasien Lama</option>
                         <option value="baru">Pasien Baru</option>
@@ -239,7 +248,8 @@
                 <div>
                     <label for="id_pasien" class="block text-sm font-medium text-gray-700">Pasien</label>
                     <select wire:model="id_pasien" id="id_pasien"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" readonly>
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        disabled>
                         <option value="">-- Pilih Pasien --</option>
                         @foreach ($patients as $pasien)
                             <option value="{{ $pasien->id }}" @if ($pasien->id == $id_pasien) selected @endif>
@@ -257,7 +267,8 @@
                 <div>
                     <label for="id_layanan" class="block text-sm font-medium text-gray-700">Jenis Layanan</label>
                     <select wire:model.live="id_layanan" id="id_layanan"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" readonly>
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        disabled
                         <option value="">-- Pilih Layanan --</option>
                         @foreach ($daftarLayanan as $layanan)
                             <option value="{{ $layanan->id }}">{{ $layanan->nama }}</option>
@@ -273,7 +284,7 @@
                         Layanan</label>
                     <select wire:model="layanan_detail_id" id="layanan_detail_id"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        @disabled(empty($id_layanan)) readonly>
+                        @disabled(empty($id_layanan)) disabled>
                         <option value="">-- Pilih Detail --</option>
                         @foreach ($daftarDetailLayanan as $detail)
                             <option value="{{ $detail->id }}" @selected($detail->id == $layanan_detail_id)>
@@ -289,7 +300,8 @@
                 <div>
                     <label for="catatan" class="block text-sm font-medium text-gray-700">Catatan</label>
                     <input wire:model="catatan" type="text" id="catatan"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" readonly>
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        disabled>
                     @error('catatan')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                     @enderror
@@ -309,6 +321,55 @@
         </form>
     </x-modal>
 
-
-
 </div>
+
+{{-- <div x-data="{ tab: 'riwayat' }" class="max-w-4xl mx-auto mt-8">
+    <!-- Tabs -->
+    <div class="flex bg-gray-100 rounded-t-xl overflow-hidden border border-b-0 border-gray-200">
+        <template x-for="item in ['riwayat', 'lab', 'pemeriksaan', 'tindakan', 'resep', 'simpan']" :key="item">
+            <button
+                @click="tab = item"
+                class="px-5 py-3 text-sm font-medium transition duration-200"
+                :class="{
+                    'bg-white text-gray-900 font-semibold border border-b-0 border-gray-200 rounded-t-xl': tab === item,
+                    'text-gray-500 hover:text-gray-700': tab !== item
+                }"
+                x-text="item.charAt(0).toUpperCase() + item.slice(1)">
+            </button>
+        </template>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="bg-white rounded-b-xl shadow p-6 border border-t-0 border-gray-200">
+        <div x-show="tab === 'riwayat'" x-cloak>
+            <label class="block text-gray-700 font-semibold mb-1">Riwayat</label>
+            <textarea class="w-full border border-gray-300 rounded-md p-2" rows="4" placeholder="Masukkan riwayat pasien..."></textarea>
+        </div>
+
+        <div x-show="tab === 'lab'" x-cloak>
+            <label class="block text-gray-700 font-semibold mb-1">Hasil Lab</label>
+            <textarea class="w-full border border-gray-300 rounded-md p-2" rows="4" placeholder="Masukkan hasil lab..."></textarea>
+        </div>
+
+        <div x-show="tab === 'pemeriksaan'" x-cloak>
+            <label class="block text-gray-700 font-semibold mb-1">Pemeriksaan Dokter</label>
+            <textarea class="w-full border border-gray-300 rounded-md p-2" rows="4" placeholder="Masukkan hasil pemeriksaan..."></textarea>
+        </div>
+
+        <div x-show="tab === 'tindakan'" x-cloak>
+            <label class="block text-gray-700 font-semibold mb-1">Tindakan</label>
+            <textarea class="w-full border border-gray-300 rounded-md p-2" rows="4" placeholder="Masukkan tindakan yang dilakukan..."></textarea>
+        </div>
+
+        <div x-show="tab === 'resep'" x-cloak>
+            <label class="block text-gray-700 font-semibold mb-1">Resep</label>
+            <textarea class="w-full border border-gray-300 rounded-md p-2" rows="4" placeholder="Masukkan resep obat..."></textarea>
+        </div>
+
+        <div x-show="tab === 'simpan'" x-cloak>
+            <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                Simpan Rekam Medis
+            </button>
+        </div>
+    </div>
+</div> --}}

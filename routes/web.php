@@ -39,9 +39,25 @@ Route::get('/pendaftaran', \App\Livewire\Pendaftaran\PendaftaranIndex::class)
     ->middleware('auth')
     ->name('pendaftaran');
 
+Route::get('/pemeriksaan/beautycare/{id}', \App\Livewire\Pemeriksaan\BeautyCare::class)
+    ->middleware('auth')
+    ->name('periksa-beautycare');
+
+Route::get('/pemeriksaan/umum/{id}', \App\Livewire\Pemeriksaan\KesehatanUmum::class)
+    ->middleware('auth')
+    ->name('periksa-umum');
+
 Route::get('/antrian', \App\Livewire\Pendaftaran\AntrianIndex::class)
     ->middleware('auth')
     ->name('antrian');
+
+Route::get('/permintaan-resep', \App\Livewire\Resep\PermintaanResep::class)
+    ->middleware('auth')
+    ->name('permintaan-resep');
+
+Route::get('/permintaan-resep/detail/{id}', \App\Livewire\Resep\DetailPermintaan::class)
+    ->middleware('auth')
+    ->name('permintaan-resep-detail');
 
 Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)
     ->middleware('auth')

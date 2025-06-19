@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-lg">
+            <div class="overflow-visible rounded-lg">
                 <table class="table w-full text-sm text-center border border-[#5e4a7e]">
                     <thead class="bg-[#3b82f6] bg-opacity-90 text-white">
                         <tr>
@@ -138,20 +138,40 @@
                                             Dikenal</span>
                                     @endif
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
-                                    <div class="flex justify-center gap-2">
-                                        <button wire:click="editPendaftaran({{ $p->id }})"
-                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
+                                <td class="py-2 px-4 border border-[#5e4a7e] text-center">
+                                                    <div class="overflow-visible">
+
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <button @click="open = !open"
+                                            class="bg-blue-500 hover:bg-blue-900 text-white px-3 py-2 rounded text-sm flex items-center gap-1">
+                                            Detail
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
                                         </button>
-                                        <button wire:click="openDeleteModal({{ $p->id }})"
-                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Hapus">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+
+                                        <div x-show="open" @click.away="open = false"
+                                            class="absolute z-10 mt-2 w-36 bg-white border border-gray-200 rounded shadow-lg overflow-hidden text-sm text-left">
+                                            @if ($p->status === 'menunggu')
+                                                <button wire:click="panggilPasien({{ $p->id }})"
+                                                    class="w-full text-left px-4 py-2 hover:bg-gray-100">
+                                                    <i class="fas fa-bullhorn mr-1 text-purple-500"></i> Panggil
+                                                </button>
+                                            @endif
+                                            <button wire:click="editPendaftaran({{ $p->id }})"
+                                                class="w-full text-left px-4 py-2 hover:bg-gray-100">
+                                                <i class="fas fa-edit mr-1 text-yellow-500"></i> Edit
+                                            </button>
+                                            <button wire:click="openDeleteModal({{ $p->id }})"
+                                                class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">
+                                                <i class="fas fa-trash-alt mr-1"></i> Hapus
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
+
                             </tr>
                         @empty
                             <tr>
@@ -239,7 +259,8 @@
                 <div>
                     <label for="id_pasien" class="block text-sm font-medium text-gray-700">Pasien</label>
                     <select wire:model="id_pasien" id="id_pasien"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"  @disabled(empty($jenis_pasien))>
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        @disabled(empty($jenis_pasien))>
                         <option value="">-- Pilih Pasien --</option>
                         @foreach ($patients as $pasien)
                             <option value="{{ $pasien->id }}" @if ($pasien->id == $id_pasien) selected @endif>

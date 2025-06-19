@@ -15,6 +15,12 @@ return [
         'icon'  => $icon['patient'],
         'roles' => [], 
     ],
+    // [
+    //     'label' => 'Rekam Medis',
+    //     'url'   => 'rekam-medis',
+    //     'icon'  => $icon['patient'],
+    //     'roles' => [], 
+    // ],
     [
         'label' => 'Pendaftaran Pasien',
         'url'   => 'pendaftaran',
@@ -24,6 +30,12 @@ return [
     [
         'label' => 'Antrian Pasien',
         'url'   => 'antrian',
+        'icon'  => $icon['registration-patient'],
+        'roles' => [], 
+    ],
+    [
+        'label' => 'Permintaan Resep',
+        'url'   => 'permintaan-resep',
         'icon'  => $icon['registration-patient'],
         'roles' => [], 
     ],
