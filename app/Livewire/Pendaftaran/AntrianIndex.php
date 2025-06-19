@@ -36,28 +36,28 @@ class AntrianIndex extends Component
     public $catatan;
 
     public function render()
-{
-    $pendaftaran = Pendaftaran::query()
-        ->with(['pasien', 'layanan'])
-        ->whereDate('tanggal_kunjungan', Carbon::today()) // 🔍 hanya data hari ini
-        ->when($this->search, function ($query) {
-            $query->where(function ($q) {
-                $q->where('kode_pendaftaran', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('pasien', function ($q2) {
-                        $q2->where('nomor_rm', 'like', '%' . $this->search . '%');
-                    });
-            });
-        })
-        ->orderBy($this->sortField, $this->sortDirection)
-        ->paginate($this->perPage);
+    {
+        $pendaftaran = Pendaftaran::query()
+            ->with(['pasien', 'layanan'])
+            ->whereDate('tanggal_kunjungan', Carbon::today()) // 🔍 hanya data hari ini
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('kode_pendaftaran', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('pasien', function ($q2) {
+                            $q2->where('nomor_rm', 'like', '%' . $this->search . '%');
+                        });
+                });
+            })
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
 
-    $daftarLayanan = Layanan::all();
+        $daftarLayanan = Layanan::all();
 
-    return view('livewire.pendaftaran.antrian-index', [
-        'pendaftaran' => $pendaftaran,
-        'daftarLayanan' => $daftarLayanan,
-    ])->extends('layouts.app');
-}
+        return view('livewire.pendaftaran.antrian-index', [
+            'pendaftaran' => $pendaftaran,
+            'daftarLayanan' => $daftarLayanan,
+        ])->extends('layouts.app');
+    }
 
     public function updatedIdLayanan($value)
     {

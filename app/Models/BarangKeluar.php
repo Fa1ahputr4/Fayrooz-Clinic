@@ -14,6 +14,7 @@ class BarangKeluar extends Model
         'stok_umum_id',
         'barang_id',
         'barang_masuk_id',
+        'history_id',
         'jumlah',
         'status_keluar',
         'tanggal_keluar',

@@ -5,6 +5,7 @@ use Livewire\Livewire;
 
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,10 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Livewire::component('user-management', \App\Livewire\user\UserManagement::class);
-        Livewire::component('layanan-menu', \App\Livewire\layanan\LayananMenu::class);
-        Livewire::component('barang-table', \App\Livewire\barang\BarangTable::class);
-        Livewire::component('barang-masuk-table', \App\Livewire\barang_masuk\BarangMasukTable::class);
+       
 
     }
 }

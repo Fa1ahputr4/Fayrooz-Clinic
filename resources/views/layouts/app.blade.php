@@ -14,6 +14,7 @@
 
     <!-- Tambahan CSS lokal (jika ada style custom) -->
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/modal-bootstrap5.css') }}">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">

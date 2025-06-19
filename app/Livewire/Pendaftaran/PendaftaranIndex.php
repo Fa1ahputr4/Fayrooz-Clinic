@@ -60,7 +60,8 @@ class PendaftaranIndex extends Component
                         });
                 });
             })
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderByRaw("FIELD(status, 'menunggu', 'diperiksa', 'selesai')") // prioritas status
+            ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
 
         $daftarLayanan = Layanan::all();
@@ -182,6 +183,18 @@ class PendaftaranIndex extends Component
         $this->resetForm();
         $this->resetErrorBag();
     }
+
+    public function panggilPasien($id)
+    {
+        $pendaftaran = Pendaftaran::find($id);
+        if ($pendaftaran && $pendaftaran->status === 'menunggu') {
+            $pendaftaran->status = 'diperiksa';
+            $pendaftaran->save();
+
+            session()->flash('message', 'Pasien telah dipanggil dan status diperbarui.');
+        }
+    }
+
 
     public function savePendaftaran()
     {

@@ -69,6 +69,7 @@ class BarangIndex extends Component
     public function openModal()
     {
         $this->resetForm();
+        $this->dispatch('tambahBarang');
         $this->isModalOpen = true;
     }
 
@@ -117,6 +118,8 @@ class BarangIndex extends Component
         $this->satuan = $item->satuan;
         $this->jumlah_stok = $item->jumlah_stok;
         $this->isModalOpen = true;
+
+        $this->dispatch('editBarang');
     }
 
     public function saveBarang()
