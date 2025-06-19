@@ -705,7 +705,7 @@
         }
 
         function initSelect2DiagnosaTambahan() {
-             const $select = $('#diagnosa_tambahan');
+            const $select = $('#diagnosa_tambahan');
             const livewireValue = @this.get('diagnosisTambahan'); // ini array of values
 
             if ($.fn.select2 && $select.hasClass('select2-hidden-accessible')) {
@@ -747,31 +747,28 @@
                 @this.set('diagnosisTambahan', $select.val());
             });
 
-            // Tangani tombol tambah keluhan
             // Tangani tombol tambah diagnosa
-$select.on('select2:open', function () {
-    setTimeout(() => {
-        $(document).off('click', '#tambah-diagnosis-btn').on('click', '#tambah-diagnosis-btn', function () {
-            const $searchInput = $('.select2-container--open .select2-search__field');
-            const keyword = $searchInput.val()?.trim();
+            $select.on('select2:open', function() {
+                $(document).off('click', '#tambah-diagnosis-btn').on('click', '#tambah-diagnosis-btn', function() {
+                    const $searchInput = $('.select2-container--open .select2-search__field');
+                    const keyword = $searchInput.val()?.trim();
 
-            if (keyword) {
-                const tempId = `temp-${keyword}`;
+                    if (keyword) {
+                        const tempId = `temp-${keyword}`;
 
-                if (!$select.find(`option[value="${tempId}"]`).length) {
-                    const newOption = new Option(keyword, tempId, true, true);
-                    $select.append(newOption).trigger('change');
+                        if (!$select.find(`option[value="${tempId}"]`).length) {
+                            const newOption = new Option(keyword, tempId, true, true);
+                            $select.append(newOption).trigger('change');
 
-                    // Update ke Livewire
-                    const currentVal = $select.val();
-                    @this.set('diagnosisTambahan', currentVal);
-                }
+                            // Update ke Livewire
+                            const currentVal = $select.val();
+                            @this.set('diagnosisTambahan', currentVal);
+                        }
 
-                $select.select2('close');
-            }
-        });
-    }, 0);
-});
+                        $select.select2('close');
+                    }
+                });
+            });
 
         }
 
