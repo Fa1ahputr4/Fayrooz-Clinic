@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div class="overflow-auto w-full rounded-lg">
+            <div class="overflow-visible w-full rounded-lg">
                 <table class="table w-full text-sm text-center border border-[#5e4a7e]">
                     <thead class="bg-[#3b82f6] bg-opacity-90 text-white">
                         <tr>
@@ -123,12 +123,39 @@
                                 <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->alamat }}</td>
                                 <td class="py-2 px-4 border border-[#5e4a7e]">
                                     <div class="flex justify-center gap-2">
+                                        <!-- Medical Record Dropdown -->
+                                        <div class="relative" x-data="{ open: false }">
+                                            <button @click="open = !open"
+                                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
+                                                title="Rekam Medis">
+                                                <i class="fas fa-file-medical"></i>
+                                                <i class="fas fa-caret-down ml-1"></i>
+                                            </button>
+
+                                            <!-- Dropdown Menu -->
+                                            <div x-show="open" @click.away="open = false"
+                                                class="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200">
+                                                <div class="py-1">
+                                                    <a wire:navigate.hover href="{{ route('rekmed-umum', ['id' => $patient->id]) }}"
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-file-alt mr-2"></i> Rekmed Umum
+                                                    </a>
+                                                    <a wire:navigate.hover href=""
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-spa mr-2"></i> Beautycare
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Edit Button -->
                                         <a wire:navigate.hover href="{{ route('pasien-edit', ['id' => $patient->id]) }}"
                                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
 
+                                        <!-- Delete Button -->
                                         <button wire:click="openDeleteModal({{ $patient->id }})"
                                             class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                             title="Hapus">
@@ -157,8 +184,8 @@
         <div class="sm:flex sm:items-start">
             <div
                 class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
