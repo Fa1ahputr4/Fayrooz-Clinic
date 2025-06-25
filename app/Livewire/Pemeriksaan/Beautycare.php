@@ -357,40 +357,40 @@ class Beautycare extends Component
                 'status' => 'selesai'
             ]);
 
-            // if ($rekmed->kontrol_ulang && $rekmed->jadwal_kontrol_ulang && !$rekmed->notifikasi_terkirim) {
-            //     $pasien = $rekmed->pendaftaran->pasien ?? null;
-            //     $noWaInput = $this->noPasien ?: ($pasien->no_wa ?? null);
-            //     $noWa = $this->formatNomorWa($noWaInput);
+            if ($rekmed->kontrol_ulang && $rekmed->jadwal_kontrol_ulang && !$rekmed->notifikasi_terkirim) {
+                $pasien = $rekmed->pendaftaran->pasien ?? null;
+                $noWaInput = $this->noPasien ?: ($pasien->no_wa ?? null);
+                $noWa = $this->formatNomorWa($noWaInput);
 
-            //     if ($noWa && $pasien) {
-            //         $pesan = "Halo *{$pasien->nama_lengkap}*,\n\nIni pengingat kontrol ulang Anda di klinik kami pada (*" .
-            //             Carbon::parse($rekmed->jadwal_kontrol_ulang)->translatedFormat('l, d F Y') . "*).\n\n📌 Catatan: {$rekmed->catatan_kontrol}\n\nMohon hadir tepat waktu, terima kasih 🙏.";
+                if ($noWa && $pasien) {
+                    $pesan = "Halo *{$pasien->nama_lengkap}*,\n\nIni pengingat kontrol ulang Anda di klinik kami pada (*" .
+                        Carbon::parse($rekmed->jadwal_kontrol_ulang)->translatedFormat('l, d F Y') . "*).\n\n📌 Catatan: {$rekmed->catatan_kontrol}\n\nMohon hadir tepat waktu, terima kasih 🙏.";
 
-            //         $jadwalWIB = Carbon::create(2025, 6, 18, 8, 0, 0, 'Asia/Jakarta');
-            //         $timestampUTC = $jadwalWIB->copy()->setTimezone('UTC')->timestamp;
+                    $jadwalWIB = Carbon::create(2025, 6, 18, 8, 0, 0, 'Asia/Jakarta');
+                    $timestampUTC = $jadwalWIB->copy()->setTimezone('UTC')->timestamp;
 
-            //         try {
-            //             \Log::info('[REKMED] Kirim WA ke: ' . $noWa);
+                    try {
+                        \Log::info('[REKMED] Kirim WA ke: ' . $noWa);
 
-            //             Http::withHeaders([
-            //                 'Authorization' => 'sx7aapgSLvDzGoWeBtrT',
-            //             ])->post('https://api.fonnte.com/send', [
-            //                 'target' => $noWa,
-            //                 'message' => $pesan,
-            //                 'countryCode' => '62',
-            //                 'schedule' => $timestampUTC,
-            //             ]);
+                        Http::withHeaders([
+                            'Authorization' => 'sx7aapgSLvDzGoWeBtrT',
+                        ])->post('https://api.fonnte.com/send', [
+                            'target' => $noWa,
+                            'message' => $pesan,
+                            'countryCode' => '62',
+                            'schedule' => $timestampUTC,
+                        ]);
 
-            //             $rekmed->update(['notifikasi_terkirim' => true]);
-            //             session()->flash('success', 'Rekam medis berhasil disimpan & notifikasi dijadwalkan.');
-            //         } catch (\Exception $e) {
-            //             \Log::error("Gagal jadwalkan WA: " . $e->getMessage());
-            //             session()->flash('error', 'Data tersimpan, tapi notifikasi gagal dijadwalkan.');
-            //         }
-            //     }
-            // } else {
-            //     session()->flash('success', 'Rekam medis berhasil disimpan.');
-            // }
+                        $rekmed->update(['notifikasi_terkirim' => true]);
+                        session()->flash('success', 'Rekam medis berhasil disimpan & notifikasi dijadwalkan.');
+                    } catch (\Exception $e) {
+                        \Log::error("Gagal jadwalkan WA: " . $e->getMessage());
+                        session()->flash('error', 'Data tersimpan, tapi notifikasi gagal dijadwalkan.');
+                    }
+                }
+            } else {
+                session()->flash('success', 'Rekam medis berhasil disimpan.');
+            }
 
             \Log::info('[REKMED] Commit & redirect');
             DB::commit();
@@ -429,7 +429,7 @@ class Beautycare extends Component
         if ($pasien && $pasien->no_telepon) {
             $this->noPasien = $pasien->no_telepon;
         } else {
-            $this->addError('nomorKontrol', 'Pasien tidak memiliki nomor telepon.');
+            $this->addError('noPasien', 'Pasien tidak memiliki nomor telepon.');
         }
     }
 
