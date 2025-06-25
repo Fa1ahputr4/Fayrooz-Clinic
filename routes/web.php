@@ -110,3 +110,11 @@ Route::get('stok-rak/detail/{id}', \App\Livewire\Rak\StokRakDetail::class)
 Route::get('/barang-keluar', \App\Livewire\Barang\BarangKeluarIndex::class)
     ->middleware('auth')
     ->name('barang-keluar');
+
+Route::get('/diagnosis', \App\Livewire\Diagnosis\DiagnosisIndex::class)
+    ->middleware('auth')
+    ->name('diagnosis');
+
+Route::get('/keluhan', \App\Livewire\Keluhan\KeluhanIndex::class)
+    ->middleware('auth')
+    ->name('keluhan');
