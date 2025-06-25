@@ -59,6 +59,18 @@ return [
         'roles' => [], 
     ],
     [
+        'label' => 'Keluhan',
+        'url'   => 'keluhan',
+        'icon'  => $icon['service'],
+        'roles' => [], 
+    ],
+    [
+        'label' => 'Diagnosis',
+        'url'   => 'diagnosis',
+        'icon'  => $icon['service'],
+        'roles' => [], 
+    ],
+    [
         'label' => 'Stock Barang',
         'url'   => '#',
         'icon'  => $icon['stock'],

@@ -14,4 +14,9 @@ class Keluhan extends Model
         'deskripsi',
         'layanan_id',
     ];
+
+    public function layanan()
+    {
+        return $this->belongsTo(Layanan::class, 'layanan_id');
+    }
 }
