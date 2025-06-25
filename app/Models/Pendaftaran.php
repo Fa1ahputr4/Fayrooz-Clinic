@@ -26,4 +26,8 @@ class Pendaftaran extends Model
     {
         return $this->belongsTo(Layanan::class);
     }
+    public function layanandetail()
+    {
+        return $this->belongsTo(LayananDetail::class, 'detail_layanan_id'); // harus sesuai dengan kolom di tabel pendaftarans
+    }
 }

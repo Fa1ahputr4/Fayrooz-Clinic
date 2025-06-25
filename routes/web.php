@@ -47,6 +47,14 @@ Route::get('/pemeriksaan/umum/{id}', \App\Livewire\Pemeriksaan\KesehatanUmum::cl
     ->middleware('auth')
     ->name('periksa-umum');
 
+Route::get('/pasien/rekam-medis/umum/{id}', \App\Livewire\RekamMedis\KesehatanUmum::class)
+    ->middleware('auth')
+    ->name('rekmed-umum');
+
+Route::get('/pasien/rekam-medis/umum/detail/{id}', \App\Livewire\RekamMedis\DetailRekmedUmum::class)
+    ->middleware('auth')
+    ->name('rekmed-umum-detail');
+
 Route::get('/antrian', \App\Livewire\Pendaftaran\AntrianIndex::class)
     ->middleware('auth')
     ->name('antrian');
@@ -61,7 +69,7 @@ Route::get('/permintaan-resep/detail/{id}', \App\Livewire\Resep\DetailPermintaan
 
 Route::get('/permintaan-produk-bc/detail/{id}', \App\Livewire\Resep\DetailPermintaanProdukBc::class)
     ->middleware('auth')
-    ->name('permintaan-produkbc-detail');
+    ->name('permintaan-produk   bc-detail');
 
 Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)
     ->middleware('auth')
