@@ -60,8 +60,6 @@ class DetailPermintaan extends Component
     $this->resetErrorBag($propertyName);
 }
 
-
-
     public function mount($id)
     {
         $this->history = RekmedUmum::with([
