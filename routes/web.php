@@ -59,6 +59,10 @@ Route::get('/permintaan-resep/detail/{id}', \App\Livewire\Resep\DetailPermintaan
     ->middleware('auth')
     ->name('permintaan-resep-detail');
 
+Route::get('/permintaan-produk-bc/detail/{id}', \App\Livewire\Resep\DetailPermintaanProdukBc::class)
+    ->middleware('auth')
+    ->name('permintaan-produkbc-detail');
+
 Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)
     ->middleware('auth')
     ->name('layanan');
