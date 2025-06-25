@@ -401,7 +401,7 @@
                                     if (!value) {
                                         $wire.set('jadwalKontrolUlang', null);
                                         $wire.set('catatanJadwal', '');
-                                        $wire.set('nomorKontrol', '');
+                                        $wire.set('noPasien', '');
                                     }
                                 });
                             }
