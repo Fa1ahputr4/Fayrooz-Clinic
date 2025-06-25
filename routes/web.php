@@ -43,6 +43,14 @@ Route::get('/pemeriksaan/beautycare/{id}', \App\Livewire\Pemeriksaan\BeautyCare:
     ->middleware('auth')
     ->name('periksa-beautycare');
 
+Route::get('/pasien/rekam-medis/beautycare/{id}', \App\Livewire\RekamMedis\BeautyCare::class)
+    ->middleware('auth')
+    ->name('rekmed-beautycare');
+
+Route::get('/pasien/rekam-medis/beautycare/detail/{id}', \App\Livewire\RekamMedis\DetailRekmedBeautycare::class)
+    ->middleware('auth')
+    ->name('rekmed-beautycare-detail');
+
 Route::get('/pemeriksaan/umum/{id}', \App\Livewire\Pemeriksaan\KesehatanUmum::class)
     ->middleware('auth')
     ->name('periksa-umum');

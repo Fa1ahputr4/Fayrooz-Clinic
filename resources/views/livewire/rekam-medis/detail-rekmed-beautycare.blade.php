@@ -33,11 +33,10 @@
             </div>
 
             <!-- Tab Navigasi -->
-            <div x-data="{ tab: 'riwayat kunjungan' }" class="mt-8 w-full">
+            <div x-data="{ tab: 'pemeriksaan' }" class="mt-8 w-full">
                 <!-- Tab Header -->
                 <div class="flex bg-gray-100 rounded-t-xl overflow-x-auto border border-b-0 border-gray-200 w-full">
-                    <template
-                        x-for="item in ['riwayat kunjungan', 'pemeriksaan', 'diagnosis', 'tindakan & saran', 'dokumentasi', 'selesai']"
+                    <template x-for="item in ['pemeriksaan', 'diagnosis', 'tindakan & saran', 'dokumentasi', 'selesai']"
                         :key="item">
                         <button @click="tab = item"
                             class="px-5 py-3 text-sm font-medium transition duration-200 whitespace-nowrap"
@@ -53,66 +52,6 @@
 
                 <!-- Tab Content -->
                 <div class="bg-white rounded-b-xl shadow p-6 border border-t-0 border-gray-200 w-full ">
-                    <!-- Riwayat Kunjungan -->
-                    <div x-show="tab === 'riwayat kunjungan'" x-cloak class="space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            Riwayat Kunjungan Pasien
-                        </h3>
-
-                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-500 mb-2">Kunjungan Terakhir</h4>
-                                    <p class="text-gray-800 font-medium">15 Juni 2023</p>
-                                    <p class="text-sm text-gray-600 mt-1">Facial & Peeling</p>
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-500 mb-2">Total Kunjungan</h4>
-                                    <p class="text-gray-800 font-medium">4 Kali</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-6">
-                                <h4 class="text-sm font-medium text-gray-500 mb-3">Riwayat Lengkap</h4>
-                                <div class="space-y-4">
-                                    <div class="flex items-start border-l-4 border-indigo-200 pl-4 py-2">
-                                        <div
-                                            class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center mr-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-900">15 Juni 2023</p>
-                                            <p class="text-sm text-gray-600">Facial & Peeling - Diagnosa: Jerawat ringan
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start border-l-4 border-indigo-200 pl-4 py-2">
-                                        <div
-                                            class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center mr-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-900">1 Mei 2023</p>
-                                            <p class="text-sm text-gray-600">Microdermabrasi - Diagnosa: Kulit kusam</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Pemeriksaan -->
                     <div x-show="tab === 'pemeriksaan'" x-cloak>
@@ -192,14 +131,12 @@
                                                 <span class="ml-2 text-sm text-gray-700">Sangat Kering</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" wire:model.live="kelembapanKulit"
-                                                    value="kering"
+                                                <input type="radio" wire:model.live="kelembapanKulit" value="kering"
                                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
                                                 <span class="ml-2 text-sm text-gray-700">Kering</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" wire:model.live="kelembapanKulit"
-                                                    value="normal"
+                                                <input type="radio" wire:model.live="kelembapanKulit" value="normal"
                                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
                                                 <span class="ml-2 text-sm text-gray-700">Normal</span>
                                             </label>
@@ -211,7 +148,7 @@
                             <!-- Right Column -->
                             <div class="space-y-6 bg-white p-5 rounded-lg">
                                 <!-- Jerawat Section -->
-                               <div class="pt-4">
+                                <div class="pt-4">
                                     <div class="flex flex-col" x-data="{
                                         init() {
                                                 // Update state toggle ketika data berubah
@@ -702,8 +639,8 @@
                                                 <p class="text-xs text-gray-500">PNG, JPG up to 3MB</p>
                                             </div>
                                         </div>
-                                        <input wire:model.live="foto_before_upload" x-ref="beforeInput" type="file"
-                                            multiple accept="image/jpeg, image/png" class="sr-only"
+                                        <input wire:model.live="foto_before_upload" x-ref="beforeInput"
+                                            type="file" multiple accept="image/jpeg, image/png" class="sr-only"
                                             @change="beforeFiles = [...beforeFiles, ...filterValidFiles($event.target.files)]; $event.target.value = ''">
                                     </div>
 
@@ -773,7 +710,8 @@
                                                             </svg>
                                                         </div>
                                                     </div>
-                                                    <button @click="
+                                                    <button
+                                                        @click="
                                                             $wire.deletedPhotoIds.push(photo.id);
                                                             existingBeforePhotos.splice(index, 1);
                                                         "
@@ -943,25 +881,29 @@
                                 <!-- Subjektif -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Pemeriksaan</label>
-                                    <textarea wire:model.live="ringkasanPemeriksaan" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanPemeriksaan" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
 
                                 <!-- Objektif -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
-                                    <textarea wire:model.live="ringkasanDiagnosa" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanDiagnosa" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
 
                                 <!-- Asesmen -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Tindakan</label>
-                                    <textarea wire:model.live="ringkasanTindakan" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanTindakan" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
 
                                 <!-- Plan -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Produk</label>
-                                    <textarea wire:model.live="ringkasanProduk" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanProduk" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
                             </div>
 

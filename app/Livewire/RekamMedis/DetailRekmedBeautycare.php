@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Livewire\Pemeriksaan;
+namespace App\Livewire\RekamMedis;
+
 
 use Carbon\Carbon;
 use App\Models\Barang;
@@ -15,8 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log; // ⬅️ Tambahkan ini
-
-class Beautycare extends Component
+class DetailRekmedBeautycare extends Component
 {
 
     use WithFileUploads;
@@ -357,44 +357,9 @@ class Beautycare extends Component
                 'status' => 'selesai'
             ]);
 
-            if ($rekmed->kontrol_ulang && $rekmed->jadwal_kontrol_ulang && !$rekmed->notifikasi_terkirim) {
-                $pasien = $rekmed->pendaftaran->pasien ?? null;
-                $noWaInput = $this->noPasien ?: ($pasien->no_wa ?? null);
-                $noWa = $this->formatNomorWa($noWaInput);
-
-                if ($noWa && $pasien) {
-                    $pesan = "Halo *{$pasien->nama_lengkap}*,\n\nIni pengingat kontrol ulang Anda di klinik kami pada (*" .
-                        Carbon::parse($rekmed->jadwal_kontrol_ulang)->translatedFormat('l, d F Y') . "*).\n\n📌 Catatan: {$rekmed->catatan_kontrol}\n\nMohon hadir tepat waktu, terima kasih 🙏.";
-
-                    $jadwalWIB = Carbon::create(2025, 6, 18, 8, 0, 0, 'Asia/Jakarta');
-                    $timestampUTC = $jadwalWIB->copy()->setTimezone('UTC')->timestamp;
-
-                    try {
-                        \Log::info('[REKMED] Kirim WA ke: ' . $noWa);
-
-                        Http::withHeaders([
-                            'Authorization' => 'sx7aapgSLvDzGoWeBtrT',
-                        ])->post('https://api.fonnte.com/send', [
-                            'target' => $noWa,
-                            'message' => $pesan,
-                            'countryCode' => '62',
-                            'schedule' => $timestampUTC,
-                        ]);
-
-                        $rekmed->update(['notifikasi_terkirim' => true]);
-                        session()->flash('success', 'Rekam medis berhasil disimpan & notifikasi dijadwalkan.');
-                    } catch (\Exception $e) {
-                        \Log::error("Gagal jadwalkan WA: " . $e->getMessage());
-                        session()->flash('error', 'Data tersimpan, tapi notifikasi gagal dijadwalkan.');
-                    }
-                }
-            } else {
-                session()->flash('success', 'Rekam medis berhasil disimpan.');
-            }
-
             \Log::info('[REKMED] Commit & redirect');
             DB::commit();
-            return redirect()->route('antrian');
+            return redirect()->route('rekmed-beautycare', ['id' => $this->pasienId]);
         } catch (\Throwable $e) {
             DB::rollBack();
             \Log::error('[REKMED] ERROR: ' . $e->getMessage());
@@ -530,8 +495,11 @@ class Beautycare extends Component
 
     public function mount($id)
     {
-        $this->pendaftaran = Pendaftaran::with(['pasien', 'layanan'])->findOrFail($id);
-        $this->pendaftaranId = $id;
+        $this->rekmedId = RekmedBeautycare::with(['pendaftaran'])->findOrFail($id);
+        $idrekmed = $this->rekmedId->id;
+        $idpendaftaran = $this->rekmedId->id_pendaftaran;
+        $this->pendaftaran = Pendaftaran::with(['pasien', 'layanan'])->findOrFail($idpendaftaran);
+        $this->pendaftaranId = $idpendaftaran;
         $this->pasienId = $this->pendaftaran->pasien_id;
         $layananId = $this->pendaftaran->layanan_id;
 
@@ -543,7 +511,7 @@ class Beautycare extends Component
             ->pluck('nama', 'id')
             ->toArray();
 
-        $rekmed = \App\Models\RekmedBeautycare::where('id_pendaftaran', $id)->first();
+        $rekmed = \App\Models\RekmedBeautycare::where('id_pendaftaran', $idpendaftaran)->first();
 
         if ($rekmed) {
             $this->rekmedId = $rekmed->id; // jika ingin digunakan untuk update nanti
@@ -615,6 +583,6 @@ class Beautycare extends Component
     }
     public function render()
     {
-        return view('livewire.pemeriksaan.beautycare')->extends('layouts.app');
+        return view('livewire.rekam-medis.detail-rekmed-beautycare')->extends('layouts.app');
     }
 }

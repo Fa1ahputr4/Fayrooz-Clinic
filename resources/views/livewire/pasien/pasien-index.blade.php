@@ -140,7 +140,7 @@
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                         <i class="fas fa-file-alt mr-2"></i> Rekmed Umum
                                                     </a>
-                                                    <a wire:navigate.hover href=""
+                                                    <a wire:navigate.hover href="{{ route('rekmed-beautycare', ['id' => $patient->id]) }}"
                                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                         <i class="fas fa-spa mr-2"></i> Beautycare
                                                     </a>
