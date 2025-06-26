@@ -7,6 +7,7 @@ use App\Models\Diagnosa;
 use App\Models\DiagnosaTambahanPasien;
 use App\Models\Keluhan;
 use App\Models\KeluhanPasien;
+use App\Models\LogWhatsapp;
 use App\Models\Pendaftaran;
 use App\Models\RekmedUmum;
 use App\Models\ResepPasien;
@@ -30,7 +31,7 @@ class KesehatanUmum extends Component
     //Diagnosis
     public $daftarDiagnosisUmum = [], $daftarDiagnosisTambahan = [], $diagnosisUtama, $keteranganUtama, $diagnosisTambahan = [], $keteranganTambahan, $keparahan;
     //Tindakan & Plan
-    public $resepList = [], $tindakan, $catatan, $jadwalKontrolUlang, $catatanJadwal, $kontrolUlang = false, $nomorKontrol, $resep, $obat, $jumlahObat, $satuanObat, $aturanObat;
+    public $resepList = [], $tindakan, $catatan, $jadwalKontrolUlang, $catatanJadwal, $kontrolUlang = false, $nomorKontrol, $kirimWa, $resep, $obat, $jumlahObat, $satuanObat, $aturanObat;
     protected $listeners = ['input-updated' => '$refresh'];
 
     public  $stokObat = 0,  $jumlahObatError = null;
@@ -127,6 +128,7 @@ class KesehatanUmum extends Component
                     'keparahan' => $this->keparahan,
                     'tindakan' => $this->tindakan,
                     'kontrol_ulang' => $this->kontrolUlang,
+                    'nomor_pasien' => $this->nomorKontrol,
                     'jadwal_kontrol' => $this->jadwalKontrolUlang,
                     'catatan_tambahan' => $this->catatan,
                     'catatan_jadwal' => $this->catatanJadwal,
@@ -172,13 +174,18 @@ class KesehatanUmum extends Component
                     'keparahan' => $this->keparahan,
                     'tindakan' => $this->tindakan,
                     'kontrol_ulang' => $this->kontrolUlang,
+                    'nomor_pasien' => $this->nomorKontrol,
                     'jadwal_kontrol' => $this->jadwalKontrolUlang,
                     'catatan_tambahan' => $this->catatan,
                     'catatan_jadwal' => $this->catatanJadwal,
                 ]);
             }
 
-            if ($rekmed->kontrol_ulang && $rekmed->jadwal_kontrol && !$rekmed->notifikasi_terkirim) {
+            $logExists = LogWhatsapp::where('rekmed_umum_id', $rekmed->id)
+                ->where('status', 'sukses')
+                ->exists();
+
+            if ($rekmed->nomor_pasien && $rekmed->jadwal_kontrol && !$logExists) {
                 $pasien = $rekmed->pendaftaran->pasien ?? null;
                 $noWaInput = $this->nomorKontrol ?: ($pasien->no_wa ?? null);
                 $noWa = $this->formatNomorWa($noWaInput);
@@ -187,25 +194,55 @@ class KesehatanUmum extends Component
                     $pesan = "Halo *{$pasien->nama_lengkap}*,\n\nIni pengingat kontrol ulang Anda di klinik kami pada (*" .
                         Carbon::parse($rekmed->jadwal_kontrol)->translatedFormat('l, d F Y') . "*).\n\n📌 Catatan: {$rekmed->catatan_jadwal}\n\nMohon hadir tepat waktu, terima kasih 🙏.";
 
-                    // Jadwalkan pengiriman H-1 pukul 08:00
+                    // Ambil API WhatsApp aktif
+                    $waApi = \App\Models\WaApi::where('active', true)->first();
+
+                    if (!$waApi) {
+                        session()->flash('error', 'Tidak ada API WhatsApp yang aktif. Silakan atur terlebih dahulu.');
+                        return;
+                    }
+
+                    // Jadwalkan pengiriman (opsional, bisa juga langsung kirim tanpa schedule)
                     $jadwalWIB = Carbon::create(2025, 6, 18, 0, 55, 0, 'Asia/Jakarta');
                     $timestampUTC = $jadwalWIB->copy()->setTimezone('UTC')->timestamp;
 
                     try {
                         Http::withHeaders([
-                            'Authorization' => 'sx7aapgSLvDzGoWeBtrT',
-                        ])->post('https://api.fonnte.com/send', [
+                            'Authorization' => $waApi->token,
+                        ])->post($waApi->base_url, [
                             'target' => $noWa,
                             'message' => $pesan,
                             'countryCode' => '62',
-                            'schedule' => $timestampUTC, // ✅ timestamp UTC (GMT+0)
+                            'schedule' => $timestampUTC, // Uncomment jika ingin dijadwalkan
                         ]);
 
                         $rekmed->update(['notifikasi_terkirim' => true]);
 
+                        // Simpan log sukses
+                        LogWhatsapp::create([
+                            'rekmed_umum_id' => $rekmed->id,
+                            'nama_pasien' => $pasien->nama_lengkap,
+                            'nomor_wa' => $noWa,
+                            'pesan' => $pesan,
+                            'waktu_kirim' => now(),
+                            'status' => 'sukses',
+                            'error_message' => null,
+                        ]);
+
                         session()->flash('success', 'Rekam medis berhasil disimpan & notifikasi dijadwalkan otomatis.');
                     } catch (\Exception $e) {
                         \Log::error("Gagal jadwalkan WA Fonnte ke {$noWa}: " . $e->getMessage());
+
+                        LogWhatsapp::create([
+                            'rekmed_umum_id' => $rekmed->id,
+                            'nama_pasien' => $pasien->nama_lengkap,
+                            'nomor_wa' => $noWa,
+                            'pesan' => $pesan,
+                            'waktu_kirim' => now(),
+                            'status' => 'gagal',
+                            'error_message' => $e->getMessage(),
+                        ]);
+
                         session()->flash('error', 'Rekam medis tersimpan, tapi gagal menjadwalkan notifikasi.');
                     }
                 } else {
@@ -214,6 +251,7 @@ class KesehatanUmum extends Component
             } else {
                 session()->flash('success', 'Rekam medis berhasil disimpan tanpa notifikasi.');
             }
+
 
 
             // Simpan ulang keluhan utama
@@ -324,56 +362,56 @@ class KesehatanUmum extends Component
         return implode("\n\n", $plan);
     }
     public function getAssesmentProperty()
-{
-    $tdiagnosisUtama = null;
-    $diagnosisTambahanList = [];
+    {
+        $tdiagnosisUtama = null;
+        $diagnosisTambahanList = [];
 
-    if (!empty($this->diagnosisTambahan)) {
-        // Pisahkan ID dari database dan input manual (temp-)
-        $idDatabase = collect($this->diagnosisTambahan)
-            ->filter(fn($id) => is_numeric($id))
-            ->values()
-            ->all();
+        if (!empty($this->diagnosisTambahan)) {
+            // Pisahkan ID dari database dan input manual (temp-)
+            $idDatabase = collect($this->diagnosisTambahan)
+                ->filter(fn($id) => is_numeric($id))
+                ->values()
+                ->all();
 
-        $idTemp = collect($this->diagnosisTambahan)
-            ->filter(fn($id) => Str::startsWith($id, 'temp-'))
-            ->map(fn($id) => Str::replaceFirst('temp-', '', $id))
-            ->values()
-            ->all();
+            $idTemp = collect($this->diagnosisTambahan)
+                ->filter(fn($id) => Str::startsWith($id, 'temp-'))
+                ->map(fn($id) => Str::replaceFirst('temp-', '', $id))
+                ->values()
+                ->all();
 
-        // Ambil nama dari database
-        $namaDariDB = Diagnosa::whereIn('id', $idDatabase)
-            ->pluck('nama')
-            ->toArray();
+            // Ambil nama dari database
+            $namaDariDB = Diagnosa::whereIn('id', $idDatabase)
+                ->pluck('nama')
+                ->toArray();
 
-        // Gabungkan semuanya
-        $diagnosisTambahanList = array_merge($namaDariDB, $idTemp);
-    }
-
-    $diagnosaTambahanFormatted = null;
-    if (!empty($diagnosisTambahanList)) {
-        $diagnosaTambahanFormatted = "- Diagnosis Tambahan :\n" . collect($diagnosisTambahanList)
-            ->map(fn($item) => "  • $item")
-            ->implode("\n");
-    }
-
-    if (!empty($this->diagnosisUtama)) {
-        if (is_numeric($this->diagnosisUtama)) {
-            $diagnosa = Diagnosa::find($this->diagnosisUtama);
-            $tdiagnosisUtama = $diagnosa ? $diagnosa->nama : null;
-        } else {
-            $tdiagnosisUtama = Str::replaceFirst('temp-', '', $this->diagnosisUtama);
+            // Gabungkan semuanya
+            $diagnosisTambahanList = array_merge($namaDariDB, $idTemp);
         }
-    }
 
-    return collect([
-        $this->diagnosisUtama ? "- Diagnosis Utama : $tdiagnosisUtama" : null,
-        $this->keteranganUtama ? "- Keterangan Diagnosis Umum : $this->keteranganUtama" : null,
-        $this->keparahan ? "- Tingkat Keparahan : $this->keparahan" : null,
-        $diagnosaTambahanFormatted,
-        $this->keteranganTambahan ? "- Keterangan Diagnosis Tambahan : $this->keteranganTambahan" : null,
-    ])->filter()->implode("\n\n");
-}
+        $diagnosaTambahanFormatted = null;
+        if (!empty($diagnosisTambahanList)) {
+            $diagnosaTambahanFormatted = "- Diagnosis Tambahan :\n" . collect($diagnosisTambahanList)
+                ->map(fn($item) => "  • $item")
+                ->implode("\n");
+        }
+
+        if (!empty($this->diagnosisUtama)) {
+            if (is_numeric($this->diagnosisUtama)) {
+                $diagnosa = Diagnosa::find($this->diagnosisUtama);
+                $tdiagnosisUtama = $diagnosa ? $diagnosa->nama : null;
+            } else {
+                $tdiagnosisUtama = Str::replaceFirst('temp-', '', $this->diagnosisUtama);
+            }
+        }
+
+        return collect([
+            $this->diagnosisUtama ? "- Diagnosis Utama : $tdiagnosisUtama" : null,
+            $this->keteranganUtama ? "- Keterangan Diagnosis Umum : $this->keteranganUtama" : null,
+            $this->keparahan ? "- Tingkat Keparahan : $this->keparahan" : null,
+            $diagnosaTambahanFormatted,
+            $this->keteranganTambahan ? "- Keterangan Diagnosis Tambahan : $this->keteranganTambahan" : null,
+        ])->filter()->implode("\n\n");
+    }
 
     public function getSubjektifProperty()
     {
@@ -564,10 +602,13 @@ class KesehatanUmum extends Component
             $this->keteranganTambahan = $rekmed->keterangan_diagnosa_tambahan;
             $this->keparahan = $rekmed->keparahan;
             $this->tindakan = $rekmed->tindakan;
-            $this->kontrolUlang = (bool) $rekmed->kontrol_ulang;
             $this->jadwalKontrolUlang = $rekmed->jadwal_kontrol;
             $this->catatan = $rekmed->catatan_tambahan;
             $this->catatanJadwal = $rekmed->catatan_jadwal;
+            $this->kontrolUlang =  !empty($this->jadwalKontrolUlang) || !empty($this->catatanJadwal);
+
+            $this->nomorKontrol = $rekmed->nomor_pasien;
+            $this->kirimWa = !empty($this->nomorKontrol);
 
             // Keluhan utama (pivot)
             $this->keluhanUtama = $rekmed->keluhanUtamaPasien->pluck('keluhan_id')->toArray();
