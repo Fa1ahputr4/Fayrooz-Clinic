@@ -118,3 +118,11 @@ Route::get('/diagnosis', \App\Livewire\Diagnosis\DiagnosisIndex::class)
 Route::get('/keluhan', \App\Livewire\Keluhan\KeluhanIndex::class)
     ->middleware('auth')
     ->name('keluhan');
+
+Route::get('/whatsapp-api', \App\Livewire\Whatsapp\PengaturanWa::class)
+    ->middleware('auth')
+    ->name('whatsapp-api');
+
+Route::get('/log-whatsapp', \App\Livewire\Whatsapp\LogWa::class)
+    ->middleware('auth')
+    ->name('log-whatsapp');

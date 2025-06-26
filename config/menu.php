@@ -71,6 +71,18 @@ return [
         'roles' => [], 
     ],
     [
+        'label' => 'Pengaturan WA',
+        'url'   => 'whatsapp-api',
+        'icon'  => $icon['service'],
+        'roles' => [], 
+    ],
+    [
+        'label' => 'Log Whatsapp',
+        'url'   => 'log-whatsapp',
+        'icon'  => $icon['service'],
+        'roles' => [], 
+    ],
+    [
         'label' => 'Stock Barang',
         'url'   => '#',
         'icon'  => $icon['stock'],

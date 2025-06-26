@@ -38,6 +38,7 @@ class RekmedUmum extends Model
         // tindakan & plan
         'tindakan',
         'kontrol_ulang',
+        'nomor_pasien',
         'jadwal_kontrol',
         'catatan_tambahan',
         'catatan_jadwal',

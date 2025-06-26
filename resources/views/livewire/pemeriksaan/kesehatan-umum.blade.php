@@ -352,12 +352,24 @@
                     <div x-show="tab === 'tindakan & resep'" x-cloak>
                         <div x-data="{
                             kontrolUlang: @entangle('kontrolUlang'),
+                            kirimWa: @entangle('kirimWa'),
                             init() {
+                                // Jika toggle Kontrol Ulang dimatikan, bersihkan semua
                                 this.$watch('kontrolUlang', (value) => {
                                     if (!value) {
                                         $wire.set('jadwalKontrolUlang', null);
                                         $wire.set('catatanJadwal', '');
                                         $wire.set('nomorKontrol', '');
+                                        this.kirimWa = false;
+                                        $wire.set('kirimWa', false);
+                                    }
+                                });
+                        
+                                // Jika toggle Kirim WA dimatikan, bersihkan nomor dan catatan
+                                this.$watch('kirimWa', (value) => {
+                                    if (!value) {
+                                        $wire.set('nomorKontrol', '');
+                                        $wire.set('catatanJadwal', '');
                                     }
                                 });
                             }
@@ -401,33 +413,56 @@
                                             class="w-full border border-gray-300 rounded-md px-3 py-2">
                                     </div>
 
-                                    <!-- Nomor Telepon -->
+                                    <!-- Toggle Kirim WhatsApp -->
                                     <div class="flex flex-col">
-                                        <label class="text-gray-700 font-semibold mb-1">Nomor WhatsApp</label>
-                                        <div class="flex space-x-2">
-                                            <input wire:model.live="nomorKontrol" type="number"
-                                                class="flex-1 border border-gray-300 rounded-md px-3 py-2"
-                                                placeholder="Contoh: 6281234567890">
-
-                                            <button type="button" wire:click="ambilNomorPasien"
-                                                class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-                                                Ambil Nomor Pasien
+                                        <label class="text-gray-700 font-semibold mb-1">Kirim WhatsApp</label>
+                                        <div class="flex items-center mt-2">
+                                            <button type="button"
+                                                @click="
+                            kirimWa = !kirimWa;
+                            $wire.set('kirimWa', kirimWa);
+                        "
+                                                :class="kirimWa ? 'bg-green-500' : 'bg-gray-300'"
+                                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none">
+                                                <span :class="kirimWa ? 'translate-x-6' : 'translate-x-1'"
+                                                    class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
                                             </button>
+                                            <span class="ml-3 text-sm text-gray-700"
+                                                x-text="kirimWa ? 'Ya' : 'Tidak'"></span>
                                         </div>
-                                        @error('nomorKontrol')
-                                            <span class="text-sm text-red-600 mt-1">{{ $message }}</span>
-                                        @enderror
                                     </div>
-
                                 </div>
 
-                                <!-- Catatan Kontrol -->
-                                <div class="mt-6">
-                                    <label class="text-gray-700 font-semibold mb-1">Catatan Kontrol</label>
-                                    <input wire:model.live="catatanJadwal" type="text"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2"
-                                        placeholder="Contoh: Evaluasi pengobatan, hasil lab, dll.">
-                                </div>
+                                <!-- Input Nomor dan Catatan (hanya muncul jika kirimWa aktif) -->
+                                <template x-if="kirimWa">
+                                    <div class="space-y-6 mt-6">
+                                        <!-- Nomor Telepon -->
+                                        <div class="flex flex-col">
+                                            <label class="text-gray-700 font-semibold mb-1">Nomor WhatsApp</label>
+                                            <div class="flex space-x-2">
+                                                <input wire:model.live="nomorKontrol" type="number"
+                                                    class="flex-1 border border-gray-300 rounded-md px-3 py-2"
+                                                    placeholder="Contoh: 6281234567890">
+
+                                                <button type="button" wire:click="ambilNomorPasien"
+                                                    class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                                                    Ambil Nomor Pasien
+                                                </button>
+                                            </div>
+                                            @error('nomorKontrol')
+                                                <span class="text-sm text-red-600 mt-1">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Catatan Kontrol -->
+                                        <div class="flex flex-col">
+                                            <label class="text-gray-700 font-semibold mb-1">Catatan Kontrol</label>
+                                            <input wire:model.live="catatanJadwal" type="text"
+                                                class="w-full border border-gray-300 rounded-md px-3 py-2"
+                                                placeholder="Contoh: Evaluasi pengobatan, hasil lab, dll.">
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 

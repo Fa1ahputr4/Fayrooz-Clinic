@@ -211,7 +211,7 @@
                             <!-- Right Column -->
                             <div class="space-y-6 bg-white p-5 rounded-lg">
                                 <!-- Jerawat Section -->
-                               <div class="pt-4">
+                                <div class="pt-4">
                                     <div class="flex flex-col" x-data="{
                                         init() {
                                                 // Update state toggle ketika data berubah
@@ -248,12 +248,14 @@
                                                     Jerawat</label>
                                                 <div class="grid grid-cols-2 gap-3">
                                                     <label class="inline-flex items-center space-x-2">
-                                                        <input type="checkbox" wire:model="jenisJerawat" value="komedo"
+                                                        <input type="checkbox" wire:model="jenisJerawat"
+                                                            value="komedo"
                                                             class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
                                                         <span class="text-sm text-gray-700">Komedo</span>
                                                     </label>
                                                     <label class="inline-flex items-center space-x-2">
-                                                        <input type="checkbox" wire:model="jenisJerawat" value="papula"
+                                                        <input type="checkbox" wire:model="jenisJerawat"
+                                                            value="papula"
                                                             class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
                                                         <span class="text-sm text-gray-700">Papula</span>
                                                     </label>
@@ -409,12 +411,23 @@
 
                         <div x-data="{
                             kontrolUlang: @entangle('kontrolUlang'),
+                            kirimWa: @entangle('kirimWa'),
                             init() {
+                                this.$watch('kirimWa', (value) => {
+                                    if (!value) {
+                                        $wire.set('noPasien', '');
+                                        $wire.set('catatanJadwal', '');
+                                    }
+                                });
+                        
+                                // Jika toggle dimatikan, bersihkan input
                                 this.$watch('kontrolUlang', (value) => {
                                     if (!value) {
                                         $wire.set('jadwalKontrolUlang', null);
                                         $wire.set('catatanJadwal', '');
                                         $wire.set('noPasien', '');
+                                        this.kirimWa = false;
+                                        $wire.set('kirimWa', false);
                                     }
                                 });
                             }
@@ -456,7 +469,7 @@
                             </div>
 
                             <!-- Kontrol Ulang Section -->
-                            <div class="bg-white p-4 rounded-lg border border-gray-200 mb-6">
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 mb-6" x-data="{ kontrolUlang: @entangle('kontrolUlang'), kirimWa: @entangle('kirimWa') }">
                                 <div class="flex items-center justify-between mb-4">
                                     <h4 class="text-sm font-medium text-gray-700">Jadwalkan Kontrol Ulang</h4>
                                     <button type="button"
@@ -468,36 +481,67 @@
                                     </button>
                                 </div>
 
-                                <div x-show="kontrolUlang" x-transition class="space-y-4 mt-4">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Tanggal & Waktu</label>
-                                            <input wire:model.live="jadwalKontrolUlang" type="datetime-local"
-                                                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Nomor WhatsApp</label>
-                                            <div class="flex space-x-2">
-                                                <input wire:model.live="noPasien" type="number"
-                                                    class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                                                    placeholder="Contoh: 6281234567890">
-                                                <button type="button" wire:click="ambilNomorPasien"
-                                                    class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition text-sm">
-                                                    Ambil Nomor
+                                <template x-if="kontrolUlang">
+                                    <div x-transition class="space-y-4 mt-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm text-gray-600 mb-1">Tanggal & Waktu</label>
+                                                <input wire:model.live="jadwalKontrolUlang" type="datetime-local"
+                                                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm text-gray-600 mb-1 flex justify-between">
+                                                    Kirim Pengingat WhatsApp
+
+                                                    @if (!$adaWaApiAktif)
+                                                        <span class="text-red-500 text-xs italic">(API tidak
+                                                            aktif)</span>
+                                                    @endif
+                                                </label>
+                                                <button type="button"
+                                                    @click="if({{ $adaWaApiAktif ? 'true' : 'false' }}) { kirimWa = !kirimWa; $wire.set('kirimWa', kirimWa); }"
+                                                    :disabled="{{ $adaWaApiAktif ? 'false' : 'true' }}"
+                                                    :class="kirimWa ? 'bg-green-500' : 'bg-gray-300'"
+                                                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50">
+                                                    <span :class="kirimWa ? 'translate-x-6' : 'translate-x-1'"
+                                                        class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
                                                 </button>
                                             </div>
-                                            @error('noPasien')
-                                                <span class="text-xs text-red-600 mt-1">{{ $message }}</span>
-                                            @enderror
                                         </div>
+
+                                        <template x-if="kirimWa">
+                                            <div class="space-y-4">
+                                                <div class=" gap-4">
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-1">Nomor
+                                                            WhatsApp</label>
+                                                        <div class="flex space-x-2">
+                                                            <input wire:model.live="noPasien" type="number"
+                                                                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                                                placeholder="Contoh: 6281234567890">
+                                                            <button type="button" wire:click="ambilNomorPasien"
+                                                                class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition text-sm">
+                                                                Ambil Nomor
+                                                            </button>
+                                                        </div>
+                                                        @error('noPasien')
+                                                            <span
+                                                                class="text-xs text-red-600 mt-1">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-sm text-gray-600 mb-1">Catatan
+                                                        Kontrol</label>
+                                                    <input wire:model.live="catatanJadwal" type="text"
+                                                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                                        placeholder="Contoh: Evaluasi pengobatan, hasil lab, dll.">
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm text-gray-600 mb-1">Catatan Kontrol</label>
-                                        <input wire:model.live="catatanJadwal" type="text"
-                                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                                            placeholder="Contoh: Evaluasi pengobatan, hasil lab, dll.">
-                                    </div>
-                                </div>
+                                </template>
                             </div>
 
                             <!-- SkinCare Prescription Section -->
@@ -702,8 +746,8 @@
                                                 <p class="text-xs text-gray-500">PNG, JPG up to 3MB</p>
                                             </div>
                                         </div>
-                                        <input wire:model.live="foto_before_upload" x-ref="beforeInput" type="file"
-                                            multiple accept="image/jpeg, image/png" class="sr-only"
+                                        <input wire:model.live="foto_before_upload" x-ref="beforeInput"
+                                            type="file" multiple accept="image/jpeg, image/png" class="sr-only"
                                             @change="beforeFiles = [...beforeFiles, ...filterValidFiles($event.target.files)]; $event.target.value = ''">
                                     </div>
 
@@ -773,7 +817,8 @@
                                                             </svg>
                                                         </div>
                                                     </div>
-                                                    <button @click="
+                                                    <button
+                                                        @click="
                                                             $wire.deletedPhotoIds.push(photo.id);
                                                             existingBeforePhotos.splice(index, 1);
                                                         "
@@ -943,25 +988,29 @@
                                 <!-- Subjektif -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Pemeriksaan</label>
-                                    <textarea wire:model.live="ringkasanPemeriksaan" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanPemeriksaan" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
 
                                 <!-- Objektif -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
-                                    <textarea wire:model.live="ringkasanDiagnosa" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanDiagnosa" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
 
                                 <!-- Asesmen -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Tindakan</label>
-                                    <textarea wire:model.live="ringkasanTindakan" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanTindakan" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
 
                                 <!-- Plan -->
                                 <div class="flex flex-col">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Produk</label>
-                                    <textarea wire:model.live="ringkasanProduk" class="w-full border border-gray-300 rounded p-2 flex-grow" rows="5" readonly></textarea>
+                                    <textarea wire:model.live="ringkasanProduk" class="w-full border border-gray-300 rounded p-2 flex-grow"
+                                        rows="5" readonly></textarea>
                                 </div>
                             </div>
 

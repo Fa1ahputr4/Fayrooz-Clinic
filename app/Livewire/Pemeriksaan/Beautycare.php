@@ -2,19 +2,20 @@
 
 namespace App\Livewire\Pemeriksaan;
 
-use Carbon\Carbon;
 use App\Models\Barang;
-use App\Models\Keluhan;
-use Livewire\Component;
 use App\Models\Diagnosa;
+use App\Models\Keluhan;
+use App\Models\LogWhatsapp;
 use App\Models\Pendaftaran;
-use Illuminate\Support\Str;
-use Livewire\WithFileUploads;
 use App\Models\RekmedBeautycare;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log; // ⬅️ Tambahkan ini
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Beautycare extends Component
 {
@@ -30,7 +31,7 @@ class Beautycare extends Component
     //diagnosa
     public $daftarDiagnosisUmum = [], $diagnosis = [], $keteranganDiagnosis, $tingkatKeparahan;
     //tindakan
-    public $barangList = [], $tindakan = [], $keteranganTindakan, $saranTreatment, $barang, $satuanBarang, $jumlahBarang, $aturanPakai, $jadwalKontrolUlang, $catatanJadwal, $kontrolUlang = false, $noPasien;
+    public $barangList = [], $tindakan = [], $keteranganTindakan, $saranTreatment, $barang, $satuanBarang, $jumlahBarang, $aturanPakai, $jadwalKontrolUlang, $catatanJadwal, $kontrolUlang = false, $noPasien, $kirimWa = false, $adaWaApiAktif = false;
     //foto
     public $foto_before = [], $foto_after = [];
     public $foto_before_upload = [], $foto_after_upload = [];
@@ -357,7 +358,11 @@ class Beautycare extends Component
                 'status' => 'selesai'
             ]);
 
-            if ($rekmed->kontrol_ulang && $rekmed->jadwal_kontrol_ulang && !$rekmed->notifikasi_terkirim) {
+            $logExists = LogWhatsapp::where('rekmed_bc_id', $rekmed->id)
+                ->where('status', 'sukses')
+                ->exists();
+
+            if ($rekmed->nomor_pasien && $rekmed->jadwal_kontrol_ulang && !$logExists) {
                 $pasien = $rekmed->pendaftaran->pasien ?? null;
                 $noWaInput = $this->noPasien ?: ($pasien->no_wa ?? null);
                 $noWa = $this->formatNomorWa($noWaInput);
@@ -366,6 +371,14 @@ class Beautycare extends Component
                     $pesan = "Halo *{$pasien->nama_lengkap}*,\n\nIni pengingat kontrol ulang Anda di klinik kami pada (*" .
                         Carbon::parse($rekmed->jadwal_kontrol_ulang)->translatedFormat('l, d F Y') . "*).\n\n📌 Catatan: {$rekmed->catatan_kontrol}\n\nMohon hadir tepat waktu, terima kasih 🙏.";
 
+                    $waApi = \App\Models\WaApi::where('active', true)->first();
+
+                    if (!$waApi) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'wa_api' => 'Tidak ada API WhatsApp yang aktif. Silakan atur terlebih dahulu.',
+                        ]);
+                    }
+
                     $jadwalWIB = Carbon::create(2025, 6, 18, 8, 0, 0, 'Asia/Jakarta');
                     $timestampUTC = $jadwalWIB->copy()->setTimezone('UTC')->timestamp;
 
@@ -373,23 +386,46 @@ class Beautycare extends Component
                         \Log::info('[REKMED] Kirim WA ke: ' . $noWa);
 
                         Http::withHeaders([
-                            'Authorization' => 'sx7aapgSLvDzGoWeBtrT',
-                        ])->post('https://api.fonnte.com/send', [
+                            'Authorization' => $waApi->token,
+                        ])->post($waApi->base_url, [
                             'target' => $noWa,
                             'message' => $pesan,
                             'countryCode' => '62',
-                            'schedule' => $timestampUTC,
                         ]);
 
                         $rekmed->update(['notifikasi_terkirim' => true]);
-                        session()->flash('success', 'Rekam medis berhasil disimpan & notifikasi dijadwalkan.');
+                        LogWhatsapp::create([
+                            'rekmed_bc_id' => $rekmed->id,
+                            'nama_pasien' => $pasien->nama_lengkap,
+                            'nomor_wa' => $noWa,
+                            'pesan' => $pesan,
+                            'waktu_kirim' => now(),
+                            'status' => 'sukses',
+                            'error_message' => null,
+                        ]);
+
+                        session()->flash('success', 'Rekam medis berhasil disimpan & notifikasi dijadwalkan otomatis.');
                     } catch (\Exception $e) {
-                        \Log::error("Gagal jadwalkan WA: " . $e->getMessage());
-                        session()->flash('error', 'Data tersimpan, tapi notifikasi gagal dijadwalkan.');
+                        \Log::error("Gagal jadwalkan WA Fonnte ke {$noWa}: " . $e->getMessage());
+
+                        // ❌ Simpan log gagal
+                        LogWhatsapp::create([
+                            'rekmed_bc_id' => $rekmed->id,
+                            'nama_pasien' => $pasien->nama_lengkap,
+                            'nomor_wa' => $noWa,
+                            'pesan' => $pesan,
+                            'waktu_kirim' => now(),
+                            'status' => 'gagal',
+                            'error_message' => $e->getMessage(),
+                        ]);
+
+                        session()->flash('error', 'Rekam medis tersimpan, tapi gagal menjadwalkan notifikasi.');
                     }
+                } else {
+                    session()->flash('error', 'Tidak dapat mengirim notifikasi karena data pasien tidak lengkap.');
                 }
             } else {
-                session()->flash('success', 'Rekam medis berhasil disimpan.');
+                session()->flash('success', 'Rekam medis berhasil disimpan tanpa notifikasi.');
             }
 
             \Log::info('[REKMED] Commit & redirect');
@@ -534,6 +570,7 @@ class Beautycare extends Component
         $this->pendaftaranId = $id;
         $this->pasienId = $this->pendaftaran->pasien_id;
         $layananId = $this->pendaftaran->layanan_id;
+        $this->adaWaApiAktif = \App\Models\WaApi::where('active', true)->exists();
 
         $this->daftarKeluhan = Keluhan::where('layanan_id', $layananId)
             ->pluck('nama', 'id')
@@ -568,11 +605,13 @@ class Beautycare extends Component
             $this->keteranganTindakan = $rekmed->keterangan_tindakan;
             $this->saranTreatment = $rekmed->saran_treatment;
 
-            $this->kontrolUlang = $rekmed->kontrol_ulang;
+
             $this->jadwalKontrolUlang = $rekmed->jadwal_kontrol_ulang;
             $this->catatanJadwal = $rekmed->catatan_kontrol;
 
             $this->noPasien = $rekmed->nomor_pasien;
+            $this->kontrolUlang = !empty($this->jadwalKontrolUlang) || !empty($this->catatanJadwal) || !empty($this->noPasien);
+            $this->kirimWa = !empty($this->noPasien);
 
             // Jika kamu juga punya foto before/after
             $this->foto_before = $rekmed->photos()
