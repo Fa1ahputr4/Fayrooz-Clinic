@@ -15,9 +15,13 @@ Route::get('/login', fn() => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware('auth')->name('dashboard');
+
+Route::get('/dashboard', \App\Livewire\Dashboard\DashboardIndex::class)
+    ->middleware('auth')
+    ->name('dashboard');
 // routes/web.php
 Route::get('/user', \App\Livewire\User\UserIndex::class)
     ->middleware('auth')

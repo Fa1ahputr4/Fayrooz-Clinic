@@ -221,7 +221,7 @@ class PendaftaranIndex extends Component
 
         $this->closeModal();
         $this->resetForm();
-        return redirect()->route('pendaftaran');
+        return $this->redirect(route('pendaftaran'), navigate: true);
     }
 
     public function resetForm()
