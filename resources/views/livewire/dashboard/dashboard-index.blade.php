@@ -6,6 +6,7 @@
             </span>
         </div>
         <p class="text-gray-700 mt-4">Ini adalah halaman dashboard utama kamu.</p>
+        <p>{{ Auth::user()->role }}</p>
     </div>
 
     <style>
