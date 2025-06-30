@@ -29,23 +29,47 @@
 
 </head>
 
-<body class="bg-[#5e4a7e] min-h-screen flex flex-col" x-data="{
+<body class="bg-[#5e4a7e] min-h-screen" x-data="{
     sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? (window.innerWidth >= 1024)),
-    mobileMenuOpen: false
-}" x-init="$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', JSON.stringify(value)))"
-    @resize.window="sidebarOpen = window.innerWidth >= 1024" x-cloak>
+    isMobile: window.innerWidth < 1024,
+    init() {
+        // Sinkronkan state awal
+        if (this.isMobile) {
+            this.sidebarOpen = false;
+        }
+
+        // Watch untuk perubahan resize
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth < 1024;
+            if (!this.isMobile) {
+                this.sidebarOpen = JSON.parse(localStorage.getItem('sidebarOpen') ?? true);
+            } else {
+                this.sidebarOpen = false;
+            }
+        });
+
+        // Watch untuk perubahan sidebarOpen
+        this.$watch('sidebarOpen', value => {
+            localStorage.setItem('sidebarOpen', JSON.stringify(value));
+        });
+    }
+}" x-cloak>
 
     <!-- Overlay untuk mobile -->
-    <div class="sidebar-overlay lg:hidden" :class="mobileMenuOpen && 'sidebar-overlay-visible'"
-        @click="mobileMenuOpen = false"></div>
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden transition-opacity duration-300"
+        x-show="isMobile && sidebarOpen" @click="sidebarOpen = false" x-transition.opacity style="display: none;"></div>
 
     <!-- Sidebar -->
     @include('layouts.sidebar')
 
     <!-- Main Content Wrapper -->
-    <div class="flex-grow flex flex-col min-h-screen main-content"
-        :class="{ 'main-content-collapsed': !$store.sidebar.open && window.innerWidth >= 1024 }">
-        {{-- <x-flash-message /> --}}
+    <div class="flex-grow flex flex-col min-h-screen transition-all duration-300"
+        :class="{
+            'ml-64': sidebarOpen && !isMobile,
+            'ml-20': !sidebarOpen && !isMobile,
+            'ml-0': isMobile
+        }">
+
         <x-flash-message />
 
         <!-- Header -->
@@ -62,22 +86,15 @@
         @if (session('success') || session('error'))
             <x-session-flash-message />
         @endif
-
     </div>
 
     <!-- Optional Custom JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
-
     <script src="{{ asset('assets/js/virtualselect.js') }}"></script>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- jQuery (Harus dimuat sebelum plugin lainnya) -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-
     @livewireScripts
-
     @stack('scripts')
 
 </body>

@@ -156,27 +156,17 @@
     display: block;
 }
 
-.dataTables_length select {
-    width: auto !important;
-    min-width: 50px;
-  }
-  
-  #userTable thead th {
-    text-align: center !important;
-    vertical-align: middle !important;
-    display: table-cell;
-  }
+/* Custom class to hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
 
-  /* Fix untuk DaisyUI */
-  .table th, .table td {
-    text-align: center;
-    vertical-align: middle;
-  }
+.hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
 
-  /* Override DataTables */
-  .dataTable thead th {
-    text-align: center !important;
-  }
 
   
   
