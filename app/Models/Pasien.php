@@ -9,6 +9,8 @@ class Pasien extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'pasien';
+
     protected $fillable = [
         'nomor_rm',
         'nik',
@@ -20,18 +22,27 @@ class Pasien extends Model
         'golongan_darah',
         'alamat',
         'no_telepon',
-        'email',
-        'nama_pj',
-        'hubungan_pj',
-        'kontak_pj',
-        'foto',
         'status_pernikahan',
-        'catatan'
+        'catatan',
+        'created_by',
+        'updated_by'
     ];
 
-    // Di model Pasien.php
+    //Relasi satu pasien bisa banyak pendaftaran
     public function pendaftaran()
     {
         return $this->hasMany(Pendaftaran::class);
+    }
+
+    //Relasi user saat tambah data
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //Relasi user saat ubah data
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

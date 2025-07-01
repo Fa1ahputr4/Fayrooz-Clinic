@@ -7,76 +7,97 @@ use App\Models\Pasien;
 
 class PasienTambah extends Component
 {
-
-    public $nomor_rm, $nik, $nama_lengkap, $jenis_kelamin = '', $tempat_lahir, $tanggal_lahir,
-        $usia, $golongan_darah = '-', $alamat, $no_telepon, $email, $nama_pj, $hubungan_pj,
-        $kontak_pj, $foto, $status_pernikahan = '', $catatan;
+    //Properti di halaman form pasien
+    public $noRm, $nik, $nama, $jk = '', $tempatLahir, $tglLahir, $usia, $golDarah = '-', $alamat, $noTelp, $statusNikah = '', $catatan;
     public $pasienId = null;
-    public $mode = 'create'; // default: tambah
+    //Cek login dokter
+    public $isDokter;
+    //Cek form tambah atau edit
+    public $mode = 'create';
 
+    // Fungsi mount untuk membawa dan Mmnginisialisasi data
+    public function mount($id = null)
+    {
+        if ($id) {
+            $this->pasienId = $id;
+            $pasien = Pasien::findOrFail($id);
+
+            $this->noRm = $pasien->nomor_rm;
+            $this->nama = $pasien->nama_lengkap;
+            $this->jk = $pasien->jenis_kelamin;
+            $this->nik = $pasien->nik;
+            $this->tempatLahir = $pasien->tempat_lahir;
+            $this->tglLahir = $pasien->tanggal_lahir;
+            $this->usia = $pasien->usia;
+            $this->golDarah = $pasien->golongan_darah;
+            $this->alamat = $pasien->alamat;
+            $this->noTelp = $pasien->no_telepon;
+            $this->statusNikah = $pasien->status_pernikahan;
+            $this->catatan = $pasien->catatan;
+        } else {
+            $this->noRm = $this->generateNomorRM();
+        }
+
+        $this->isDokter = auth()->user()->role === 'dokter';
+    }
+
+    //Fungsi render untuk mengarahkan dan merender di view
+    public function render()
+    {
+        $pasien = $this->pasienId ? Pasien::find($this->pasienId) : null;
+
+        return view('livewire.pasien.pasien-tambah', [
+            'pasien' => $pasien
+        ])->extends('layouts.app');;
+    }
+
+    //Aturan dan validasi pada input di form pasien
     public function rules()
     {
         $rules = [
-            'nik' => 'required|numeric',
-            'nama_lengkap' => 'required|string',
-            'jenis_kelamin' => 'required|string',
-            'tempat_lahir' => 'required|string',
-            'tanggal_lahir' => 'required|date',
-            'usia' => 'required|numeric',
-            'golongan_darah' => 'required|string',
+            'nik' => 'nullable|numeric',
+            'nama' => 'required|string',
+            'jk' => 'required|string',
+            'tempatLahir' => 'nullable|string',
+            'tglLahir' => 'nullable|date',
+            'usia' => 'nullable|numeric',
+            'golDarah' => 'nullable|string',
             'alamat' => 'required|string',
-            'no_telepon' => 'required|numeric',
-            'email' => 'nullable|email',
-            'nama_pj' => 'required|string',
-            'hubungan_pj' => 'required|string',
-            'kontak_pj' => 'required|numeric',
-            'status_pernikahan' => 'required|string',
+            'noTelp' => 'required|numeric',
+            'statusNikah' => 'nullable|string',
             'catatan' => 'nullable|string',
         ];
 
         if (!$this->pasienId) {
             // Jika pasienId tidak ada (tambah data), nomor_rm wajib unik
-            $rules['nomor_rm'] = 'required|unique:pasiens';
+            $rules['noRm'] = 'required|unique:pasiens,nomor_rm';
         }
 
         return $rules;
     }
 
-
-    public function mount($id = null)
+    //Pesan validasi untuk aturan input form pasien
+    public function messages()
     {
-        if ($id) {
-            $this->pasienId = $id;
-            $this->loadPatientData($id);
-        } else {
-            $this->nomor_rm = $this->generateNomorRM();
-        }
+        return [
+            'nama.required' => 'Nama pasien wajib diisi.',
+            'jk.required' => 'Jenis kelamin harus dipilih.',
+            'alamat.required' => 'Alamat tidak boleh kosong.',
+            'noTelp.required' => 'Nomor telepon wajib diisi.',
+            'noTelp.numeric' => 'Nomor telepon harus berupa angka.',
+            'noRm.required' => 'Nomor rekam medis tidak boleh kosong.',
+            'noRm.unique' => 'Nomor rekam medis sudah digunakan.',
+        ];
     }
 
-    public function loadPatientData($id)
+    //Fungsi untuk menghapus validasi ketika ada perubahan di form input
+    public function updated($propertyName)
     {
-        $pasien = Pasien::findOrFail($id);
-
-        $this->nomor_rm = $pasien->nomor_rm;
-        $this->nama_lengkap = $pasien->nama_lengkap;
-        $this->jenis_kelamin = $pasien->jenis_kelamin;
-        $this->nik = $pasien->nik;
-        $this->nomor_rm = $pasien->nomor_rm;
-        $this->tempat_lahir = $pasien->tempat_lahir;
-        $this->tanggal_lahir = $pasien->tanggal_lahir;
-        $this->usia = $pasien->usia;
-        $this->golongan_darah = $pasien->golongan_darah;
-        $this->alamat = $pasien->alamat;
-        $this->no_telepon = $pasien->no_telepon;
-        $this->email = $pasien->email;
-        $this->nama_pj = $pasien->nama_pj;
-        $this->hubungan_pj = $pasien->hubungan_pj;
-        $this->kontak_pj = $pasien->kontak_pj;
-        $this->foto = $pasien->foto;
-        $this->status_pernikahan = $pasien->status_pernikahan;
-        $this->catatan = $pasien->catatan;
+        $this->resetErrorBag($propertyName);
     }
 
+
+    //Fungsi untuk membuat rekam medis baru
     protected function generateNomorRM()
     {
         $today = now()->format('Ymd');
@@ -90,67 +111,41 @@ class PasienTambah extends Component
 
         return 'RM-' . $today . '-' . str_pad($lastNumber, 4, '0', STR_PAD_LEFT);
     }
+
+    //Fungsi untuk menyimpan dan update data
     public function save()
     {
         $this->validate($this->rules());
 
-        $fotoPath = $this->foto ? $this->foto->store('foto-pasien', 'public') : null;
+        $data = [
+            'nik' => $this->nik,
+            'nama_lengkap' => $this->nama,
+            'jenis_kelamin' => $this->jk,
+            'tempat_lahir' => $this->tempatLahir,
+            'tanggal_lahir' => $this->tglLahir,
+            'usia' => $this->usia,
+            'golongan_darah' => $this->golDarah,
+            'alamat' => $this->alamat,
+            'no_telepon' => $this->noTelp,
+            'status_pernikahan' => $this->statusNikah ?: null,
+            'catatan' => $this->catatan,
+        ];
 
         if ($this->pasienId) {
-            // ✏️ Mode Edit
+            // Untuk update data
+            $data['updated_by'] = auth()->id(); // ID user yang sedang login
             $pasien = Pasien::findOrFail($this->pasienId);
-
-            $pasien->update([
-                'nik' => $this->nik,
-                'nama_lengkap' => $this->nama_lengkap,
-                'jenis_kelamin' => $this->jenis_kelamin,
-                'tempat_lahir' => $this->tempat_lahir,
-                'tanggal_lahir' => $this->tanggal_lahir,
-                'usia' => $this->usia,
-                'golongan_darah' => $this->golongan_darah,
-                'alamat' => $this->alamat,
-                'no_telepon' => $this->no_telepon,
-                'email' => $this->email,
-                'nama_pj' => $this->nama_pj,
-                'hubungan_pj' => $this->hubungan_pj,
-                'kontak_pj' => $this->kontak_pj,
-                'status_pernikahan' => $this->status_pernikahan,
-                'catatan' => $this->catatan,
-                // Update foto hanya jika ada file baru
-                'foto' => $fotoPath ?? $pasien->foto,
-            ]);
-
+            $pasien->update($data);
             session()->flash('success', 'Data pasien berhasil diperbarui.');
         } else {
-            // ➕ Mode Tambah
-            Pasien::create([
-                'nomor_rm' => $this->nomor_rm,
-                'nik' => $this->nik,
-                'nama_lengkap' => $this->nama_lengkap,
-                'jenis_kelamin' => $this->jenis_kelamin,
-                'tempat_lahir' => $this->tempat_lahir,
-                'tanggal_lahir' => $this->tanggal_lahir,
-                'usia' => $this->usia,
-                'golongan_darah' => $this->golongan_darah,
-                'alamat' => $this->alamat,
-                'no_telepon' => $this->no_telepon,
-                'email' => $this->email,
-                'nama_pj' => $this->nama_pj,
-                'hubungan_pj' => $this->hubungan_pj,
-                'kontak_pj' => $this->kontak_pj,
-                'foto' => $fotoPath,
-                'status_pernikahan' => $this->status_pernikahan,
-                'catatan' => $this->catatan,
-            ]);
-
-
+            // Untuk create data baru
+            $data['created_by'] = auth()->id(); // ID user yang sedang login
+            $data['updated_by'] = auth()->id(); // Juga diisi saat pertama dibuat
+            $data['nomor_rm'] = $this->noRm;
+            Pasien::create($data);
             session()->flash('success', 'Data pasien berhasil ditambah.');
         }
-        return redirect()->route('pasien');
-    }
 
-    public function render()
-    {
-        return view('livewire.pasien.pasien-tambah')->extends('layouts.app');;
+        return redirect()->route('pasien');
     }
 }
