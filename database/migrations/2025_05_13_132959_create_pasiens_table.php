@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pasiens', function (Blueprint $table) {
+        Schema::create('pasien', function (Blueprint $table) {
             $table->id();
             $table->string('nomor_rm')->unique();
             $table->string('nik', 16)->nullable();
@@ -23,14 +23,15 @@ return new class extends Migration
             $table->enum('golongan_darah', ['A', 'B', 'AB', 'O', '-'])->nullable();
             $table->text('alamat')->nullable();
             $table->string('no_telepon')->nullable();
-            $table->string('email')->nullable();
-            $table->string('nama_pj')->nullable();
-            $table->string('hubungan_pj')->nullable();
-            $table->string('kontak_pj')->nullable();
-            $table->string('foto')->nullable();
             $table->enum('status_pernikahan', ['belum_menikah', 'menikah', 'cerai_hidup', 'cerai_mati'])->nullable();
-            $table->text('catatan')->nullable();    
+            $table->text('catatan')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();         
+            $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
         });
     }
 
@@ -39,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pasiens');
+        Schema::dropIfExists('pasien');
     }
 };

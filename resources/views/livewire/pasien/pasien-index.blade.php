@@ -1,166 +1,123 @@
 <div>
-    <!-- Breadcrumbs -->
+    {{-- BreadCrumbs    --}}
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Data Pasien</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('pasien') }}" class="hover:underline">Data Pasien</a>
+        </div>
     </div>
 
-    <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    {{-- Konten --}}
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow ">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Data Pasien</h2>
             <a wire:navigate.hover href="{{ route('pasien-tambah') }}"
                 class="bg-blue-500 hover:bg-blue-900 text-white px-3 py-2 rounded text-sm flex items-center">
                 Tambah Data
             </a>
-
         </div>
 
         <div>
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                {{-- Data Entries --}}
                 <div>
-                    <select wire:model.live="perPage" class="border rounded rounded-lg">
+                    <select wire:model.live="perPage" class="border border-gray-400 rounded-lg px-2 py-1 pr-5">
                         <option value="10">10 entri</option>
                         <option value="25">25 entri</option>
                         <option value="50">50 entri</option>
                         <option value="100">100 entri</option>
                     </select>
                 </div>
-                <div>
+
+                {{-- Kolom Pencarian dan Tombol Export --}}
+                <div class="flex items-center gap-2 flex-wrap">
+                    {{-- Tombol Export Excel --}}
+                    <button wire:click="exportExcel" wire:loading.attr="disabled" wire:loading.class="opacity-50"
+                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                        <span wire:loading.remove>
+                            <i class="fas fa-file-excel mr-1"></i> Excel
+                        </span>
+                        <span wire:loading>
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Menyiapkan...
+                        </span>
+                    </button>
+                    {{-- Input Pencarian --}}
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari..."
-                        class="input input-bordered w-full max-w-xs rounded-full" />
+                        class="border border-gray-400 px-3 py-1.5 rounded-full max-w-xs" />
                 </div>
             </div>
 
-            <div class="overflow-visible w-full rounded-lg">
-                <table class="table w-full text-sm text-center border border-[#5e4a7e]">
-                    <thead class="bg-[#3b82f6] bg-opacity-90 text-white">
+            {{-- Tabel Pasien --}}
+            <div class="overflow-x-auto w-full">
+                <table class="table w-full text-sm text-center border border-[#578FCA]">
+                    <thead class="bg-[#578FCA] bg-opacity-90 text-white">
                         <tr>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer">
+                            <th class="py-3 px-4 cursor-pointer">
                                 No
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('nomor_rm')">
-                                Nomor Rekam medis
-                                @if ($sortField === 'nomor_rm')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('nama_lengkap')">
-                                Nama Pasein
-                                @if ($sortField === 'nama_lengkap')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('jenis_kelamin')">
-                                Jenis Kelamin
-                                @if ($sortField === 'jenis_kelamin')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('usia')">
-                                Usia
-                                @if ($sortField === 'usia')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('no_telepon')">
-                                Nomor Telepon
-                                @if ($sortField === 'no_telepon')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('alamat')">
-                                Alamat
-                                @if ($sortField === 'alamat')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Aksi</th>
+                            <x-sortable-column field="nama_lengkap" :currentField="$sortField" :currentDirection="$sortDirection"
+                                label="Nama Pasien" />
+                            <x-sortable-column field="jenis_kelamin" :currentField="$sortField" :currentDirection="$sortDirection"
+                                label="Jenis Kelamin" />
+                            <x-sortable-column field="usia" :currentField="$sortField" :currentDirection="$sortDirection" label="Usia" />
+                            <th class="py-3 px-4">Telepon</th>
+                            <th class="py-3 px-4">Alamat</th>
+                            <th class="py-3 px-4">Rekam Medis</th>
+                            <th class="py-3 px-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($patients as $index => $patient)
-                            <tr class="hover:bg-[#f3eaff] transition-all" wire:key="user-{{ $patient->id }}">
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                        @forelse ($patients as $index => $p)
+                            <tr class="hover:bg-[#f3eaff] transition-all" wire:key="pasien-{{ $p->id }}">
+                                <td class="py-2 px-4 border border-gray-300">
                                     {{ $patients->firstItem() + $index }}
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->nomor_rm }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->nama_lengkap }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->jenis_kelamin }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->usia }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->no_telepon }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $patient->alamat }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
-                                    <div class="flex justify-center gap-2">
-                                        <!-- Medical Record Dropdown -->
-                                        <div class="relative" x-data="{ open: false }">
-                                            <button @click="open = !open"
-                                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                                title="Rekam Medis">
-                                                <i class="fas fa-file-medical"></i>
-                                                <i class="fas fa-caret-down ml-1"></i>
-                                            </button>
-
-                                            <!-- Dropdown Menu -->
-                                            <div x-show="open" @click.away="open = false"
-                                                class="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200">
-                                                <div class="py-1">
-                                                    <a wire:navigate.hover href="{{ route('rekmed-umum', ['id' => $patient->id]) }}"
-                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                        <i class="fas fa-file-alt mr-2"></i> Rekmed Umum
-                                                    </a>
-                                                    <a wire:navigate.hover href="{{ route('rekmed-beautycare', ['id' => $patient->id]) }}"
-                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                        <i class="fas fa-spa mr-2"></i> Beautycare
-                                                    </a>
-                                                </div>
-                                            </div>
+                                <td class="py-2 px-4 border border-gray-200 text-left">
+                                    <div class="font-medium text-gray-800">{{ $p->nama_lengkap }}</div>
+                                    <div class="text-sm text-gray-500">{{ $p->nomor_rm }}</div>
+                                </td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    {{ $p->jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan' }}
+                                </td>
+                                <td class="py-2 px-4 border border-gray-300">{{ $p->usia ?: '-' }}</td>
+                                <td class="py-2 px-4 border border-gray-300">{{ $p->no_telepon ?: '-' }}</td>
+                                <td class="py-2 px-4 border border-gray-300">{{ $p->alamat ?: '-' }}</td>
+                                <td class="py-2 px-4 border border-gray-300 text-center">
+                                    <div class="flex flex-col items-center space-y-2">
+                                        <div class="w-36">
+                                            <a wire:navigate.hover href="{{ route('rekmed-umum', ['id' => $p->id]) }}"
+                                                class="w-full inline-flex items-center justify-center bg-[#0ABAB5] hover:bg-[#03A6A1] text-white px-3 py-1.5 rounded text-sm">
+                                                <i class="fas fa-file-alt mr-2"></i> Umum
+                                            </a>
                                         </div>
 
-                                        <!-- Edit Button -->
-                                        <a wire:navigate.hover href="{{ route('pasien-edit', ['id' => $patient->id]) }}"
-                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
+                                        <div class="w-36">
+                                            <a wire:navigate.hover
+                                                href="{{ route('rekmed-beautycare', ['id' => $p->id]) }}"
+                                                class="w-full inline-flex items-center justify-center bg-[#C084FC] hover:bg-[#A855F7] text-white px-3 py-1.5 rounded text-sm">
+                                                <i class="fas fa-spa mr-2"></i> Beautycare
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="flex justify-center gap-2">
+                                        <a wire:navigate.hover href="{{ route('pasien-edit', ['id' => $p->id]) }}"
+                                            class="{{ $isDokter ? 'bg-blue-500 hover:bg-blue-600' : 'bg-yellow-500 hover:bg-yellow-600' }} text-white px-3 py-2 rounded text-sm flex items-center gap-1"
+                                            title="{{ $isDokter ? 'Lihat Detail' : 'Edit' }}">
+                                            <i class="fas {{ $isDokter ? 'fa-eye' : 'fa-edit' }}"></i>
                                         </a>
 
-                                        <!-- Delete Button -->
-                                        <button wire:click="openDeleteModal({{ $patient->id }})"
-                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Hapus">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                        {{-- Tombol Hapus --}}
+                                        @unless ($isDokter)
+                                            <button wire:click="openDeleteModal({{ $p->id }})"
+                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
+                                                title="Hapus">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        @endunless
                                     </div>
                                 </td>
                             </tr>
@@ -174,13 +131,15 @@
 
             </div>
 
+            {{-- Paginasi --}}
             <div class="mt-4">
                 {{ $patients->links('vendor.livewire.tailwind') }}
             </div>
         </div>
     </div>
 
-    <x-modal wire:model="isDeleteModalOpen" title="Hapus User">
+    {{-- Modal Konfirmasi Hapus Data Pasien --}}
+    <x-modal wire:model="isDeleteModalOpen" title="Hapus Data Pasien">
         <div class="sm:flex sm:items-start">
             <div
                 class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -192,8 +151,8 @@
             </div>
             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                 <p class="text-sm text-gray-500">
-                    Apakah Anda yakin ingin menghapus Data Pasien <strong>{{ $nama_lengkap }}</strong> dengan Kode
-                    <strong>{{ $nomor_rm }}</strong>? Data yang sudah dihapus tidak dapat dikembalikan.
+                    Apakah Anda yakin ingin menghapus Data Pasien <strong>{{ $nama }}</strong> dengan Kode
+                    <strong>{{ $noRm }}</strong>? Data yang sudah dihapus tidak dapat dikembalikan.
                 </p>
             </div>
         </div>
