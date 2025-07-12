@@ -12,6 +12,7 @@ class PermintaanResep extends Component
 
     use WithPagination;
 
+    public $title = 'Fayrooz | Permintaan Resep';
     public $activeTab = 'obat'; // default tab
     public $perPage = 10;
     public $search = '';
@@ -19,11 +20,13 @@ class PermintaanResep extends Component
     public $sortDirection = 'asc';
     public $isModalOpen = false;
     public $isDeleteModalOpen = false;
+    
     public function render()
     {
         $histories = RekmedUmum::with([
             'pasien',
             'pendaftaran.layanan',
+            'pendaftaran.layananDetail',
             'resepPasien.barang',
         ])
             ->whereHas('resepPasien') // hanya history yang punya resep
@@ -54,6 +57,8 @@ class PermintaanResep extends Component
         return view('livewire.resep.permintaan-resep', [
             'histories' => $histories,
             'historiesBc' => $historiesBc,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 }

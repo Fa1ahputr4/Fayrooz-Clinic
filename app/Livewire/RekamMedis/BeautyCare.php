@@ -11,6 +11,7 @@ class BeautyCare extends Component
 {
     use WithPagination;
     
+    public $title = 'Fayrooz | Rekam Medis';
     public $pasienId;
     public $perPage = 10;
     public $search = '';
@@ -44,8 +45,8 @@ class BeautyCare extends Component
                     ->orWhere('tindakan', 'like', '%' . $this->search . '%');
             });
         })
-        ->join('pendaftarans', 'rekmed_beautycares.id_pendaftaran', '=', 'pendaftarans.id')
-        ->orderBy('pendaftarans.tanggal_kunjungan', 'desc') // order berdasarkan tanggal di relasi
+        ->join('pendaftaran', 'rekmed_beautycares.id_pendaftaran', '=', 'pendaftaran.id')
+        ->orderBy('pendaftaran.tanggal_kunjungan', 'desc') // order berdasarkan tanggal di relasi
         ->select('rekmed_beautycares.*') // penting agar hanya field dari rekmed_umums yang diambil
         ->paginate($this->perPage);
 
@@ -54,6 +55,8 @@ class BeautyCare extends Component
     return view('livewire.rekam-medis.beauty-care', [
         'rekamMedis' => $rekamMedis,
         'pasien' => $pasien,
-    ])->extends('layouts.app');
+    ])->extends('layouts.app' , [
+            'title' => $this->title // Kirim title ke layout
+        ]);
 }
 }

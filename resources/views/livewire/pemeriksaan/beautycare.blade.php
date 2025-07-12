@@ -1,34 +1,73 @@
 <div>
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Pemeriksaan</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('antrian') }}" class="hover:underline">Antrian Pasien</a>
+            <span class="mx-1">></span>
+            <a href="" class="hover:underline">Pemeriksan Pasien</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Pemeriksaan Beautycare</h2>
         </div>
 
         <div>
             <!-- Identitas Pasien -->
-            <div class="mb-6 p-4 bg-gray-50 border border-blue-300 rounded-lg shadow-sm">
+            <div class="mb-6 p-4 bg-gray-50 border border-[#578FCA] rounded-lg shadow-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                    <template
-                        x-for="(label, index) in [
-                        'No. Antrian', 'Jenis Kelamin', 'No. Rekam Medis', 'Usia', 
-                        'Jenis Layanan', 'Alamat', 'Nama', 'No. Telepon']"
-                        :key="index">
-                        <div class="flex">
-                            <span class="w-40 font-medium" x-text="label"></span>
-                            <span class="mr-1">:</span>
-                            <span>--data--</span>
-                        </div>
-                    </template>
+                    <!-- Baris 1 -->
+                    <div class="flex">
+                        <span class="w-40 font-medium">No. Antrian</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->nomor_antrian }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-40 font-medium">Jenis Kelamin</span>
+                        <span class="mr-1">:</span>
+                        <span> {{ $pendaftaran->pasien->jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan' }}
+                        </span>
+                    </div>
+
+                    <!-- Baris 2 -->
+                    <div class="flex">
+                        <span class="w-40 font-medium">No. Rekam Medis</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->pasien->nomor_rm }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-40 font-medium">Usia</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->pasien->usia }}</span>
+                    </div>
+
+                    <!-- Baris 3 -->
+                    <div class="flex">
+                        <span class="w-40 font-medium">Jenis Layanan</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->layanan->nama }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-40 font-medium">Alamat</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->pasien->alamat }}</span>
+                    </div>
+
+                    <!-- Baris 4 -->
+                    <div class="flex">
+                        <span class="w-40 font-medium">Nama</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->pasien->nama_lengkap }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-40 font-medium">No. Telepon</span>
+                        <span class="mr-1">:</span>
+                        <span>{{ $pendaftaran->pasien->no_telepon }}</span>
+                    </div>
                 </div>
             </div>
 

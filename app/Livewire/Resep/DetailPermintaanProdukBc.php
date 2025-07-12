@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class DetailPermintaanProdukBc extends Component
 {
+
+    public $title = 'Fayrooz | Detail Produk';
     public $rekmedBcId;
     public $history;
     public $selectedHistory;
@@ -33,7 +35,9 @@ class DetailPermintaanProdukBc extends Component
     }
     public function render()
     {
-        return view('livewire.resep.detail-permintaan-produk-bc')->extends('layouts.app');
+        return view('livewire.resep.detail-permintaan-produk-bc')->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatedRakTerpilih($value, $key)

@@ -11,6 +11,7 @@ class KeluhanIndex extends Component
 {
     use WithPagination;
 
+    public $title = 'Fayrooz | Data Keluhan';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
@@ -26,12 +27,12 @@ class KeluhanIndex extends Component
     public function render()
     {
         // Ambil data detail layanan dengan relasi kategori
-        $keluhan = Keluhan::with('layanan')
+        $keluhan = Keluhan::with('layanan', 'createdBy', 'updatedBy')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('nama', 'like', '%' . $this->search . '%')
                         ->orWhereHas('layanan', function ($q) {
-                            $q->where('nama_layanan', 'like', '%' . $this->search . '%');
+                            $q->where('nama', 'like', '%' . $this->search . '%');
                         });
                 });
             })
@@ -43,7 +44,9 @@ class KeluhanIndex extends Component
         return view('livewire.keluhan.keluhan-index', [
             'keluhan' => $keluhan,
             'categories' => $categories
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatingSearch()
@@ -119,7 +122,7 @@ class KeluhanIndex extends Component
 
         $this->validate([
             'layananId' => 'required|exists:layanan,id',
-            'namaKeluhan' => 'required|string|max:255|unique:keluhans,nama,' . $this->keluhanId,
+            'namaKeluhan' => 'required|string|max:255|unique:keluhan,nama,' . $this->keluhanId,
             'deskripsi' => 'nullable|string',
         ], [
             'layanan_id.required' => 'Jenis layanan wajib dipilih.',
@@ -136,9 +139,12 @@ class KeluhanIndex extends Component
         ];
 
         if ($this->keluhanId) {
+            $data['updated_by'] = auth()->id();
             Keluhan::find($this->keluhanId)->update($data);
             $message = 'Data keluhan berhasil diperbarui.';
         } else {
+            $data['created_by'] = auth()->id();
+            $data['updated_by'] = auth()->id();
             Keluhan::create($data);
             $message = 'Data keluhan berhasil ditambahkan.';
         }

@@ -1,15 +1,15 @@
 <div>
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Layanan</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('layanan') }}" class="hover:underline">Data Layanan</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Manajemen Layanan</h2>
             <button wire:click.prevent="openModal"
@@ -18,41 +18,34 @@
         </div>
 
         <div>
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                {{-- Data Entries --}}
                 <div>
-                    <select wire:model.live="perPage" class="border rounded rounded-lg">
+                    <select wire:model.live="perPage" class="border border-gray-400 rounded-lg px-2 py-1 pr-5">
                         <option value="10">10 entri</option>
                         <option value="25">25 entri</option>
                         <option value="50">50 entri</option>
                         <option value="100">100 entri</option>
                     </select>
+
                 </div>
-                <div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="(ID,Nama,Username)"
-                        class="input input-bordered w-full max-w-xs rounded-lg" />
+
+                {{-- Kolom Pencarian dan Tombol Export --}}
+                <div class="flex items-center gap-2 flex-wrap">
+                    {{-- Input Pencarian --}}
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari..."
+                        class="border border-gray-400 px-3 py-1.5 rounded-full max-w-xs" />
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-lg">
-                <table class="table w-full text-sm text-center border border-[#5e4a7e]">
-                    <thead class="bg-[#3b82f6] bg-opacity-90 text-white">
+            <div class="overflow-x-auto w-full">
+                <table class="table w-full text-sm text-center border border-[#578FCA]">
+                    <thead class="bg-[#578FCA] bg-opacity-90 text-white">
                         <tr>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer">
+                            <th class="py-3 px-4  cursor-pointer">
                                 No
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('kode_layanan')">
-                                Kode
-                                @if ($sortField === 'kode_layanan')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('nama_layanan')">
+                            <th class="py-3 px-4  cursor-pointer" wire:click="sortBy('nama_layanan')">
                                 Nama Layanan
                                 @if ($sortField === 'nama_layanan')
                                     @if ($sortDirection === 'asc')
@@ -62,8 +55,7 @@
                                     @endif
                                 @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('layanan_id')">
+                            <th class="py-3 px-4  cursor-pointer" wire:click="sortBy('layanan_id')">
                                 Jenis Layanan
                                 @if ($sortField === 'layanan_id')
                                     @if ($sortDirection === 'asc')
@@ -73,19 +65,7 @@
                                     @endif
                                 @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('harga_layanan')">
-                                Harga Layanan
-                                @if ($sortField === 'harga_layanan')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('deskripsi_layanan')">
+                            <th class="py-3 px-4  cursor-pointer" wire:click="sortBy('deskripsi_layanan')">
                                 Deskripsi Layanan
                                 @if ($sortField === 'deskripsi_layanan')
                                     @if ($sortDirection === 'asc')
@@ -95,50 +75,43 @@
                                     @endif
                                 @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('is_active')">
-                                Status
-                                @if ($sortField === 'is_active')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Aksi</th>
+                            <th class="py-3 px-4 ">Dibuat Oleh</th>
+                            <th class="py-3 px-4 ">Terakhir Diubah</th>
+                            <th class="py-3 px-4 ">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($services as $index => $service)
-                            <tr class="hover:bg-[#f3eaff] transition-all" wire:key="user-{{ $service->id }}">
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                        @forelse ($services as $index => $s)
+                            <tr class="hover:bg-[#f3eaff] transition-all" wire:key="user-{{ $s->id }}">
+                                <td class="py-2 px-4 border border-gray-300">
                                     {{ $services->firstItem() + $index }}
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $service->kode_layanan }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $service->nama_layanan }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $service->layanan->nama }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $service->harga_layanan }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $service->deskripsi_layanan }}</td>
-
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
-                                    @if ($service->is_active === 1)
-                                        <span class="px-2 py-1 text-xs rounded bg-green-500 text-white">Aktif</span>
-                                    @elseif ($service->is_active === 0)
-                                        <span class="px-2 py-1 text-xs rounded bg-red-500 text-white">Tidak Aktif</span>
-                                    @else
-                                        <span class="px-2 py-1 text-xs rounded bg-gray-400 text-white">Status Tidak
-                                            Dikenal</span>
-                                    @endif
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $s->nama_layanan }}</div>
+                                    <div class="text-sm text-gray-500">{{ $s->kode_layanan }}</div>
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                                <td class="py-2 px-4 border border-gray-300">{{ $s->layanan->nama }}</td>
+                                <td class="py-2 px-4 border border-gray-300">{{ $s->deskripsi_layanan }}</td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $s->createdBy->name ?? '-' }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ \Carbon\Carbon::parse($s->created_at)->locale('id')->isoFormat('D MMMM Y HH:mm') }}
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $s->updatedBy->name ?? '-' }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ \Carbon\Carbon::parse($s->updated_at)->locale('id')->isoFormat('D MMMM Y HH:mm') }}
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border border-gray-300">
                                     <div class="flex justify-center gap-2">
-                                        <button wire:click="editService({{ $service->id }})"
+                                        <button wire:click="editService({{ $s->id }})"
                                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button wire:click="openDeleteModal({{ $service->id }})"
+                                        <button wire:click="openDeleteModal({{ $s->id }})"
                                             class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                             title="Hapus">
                                             <i class="fas fa-trash-alt"></i>
@@ -170,7 +143,7 @@
                 <!-- Select Jenis Layanan -->
                 <div>
                     <label for="layanan_id" class="block text-sm font-medium text-gray-700">Jenis Layanan</label>
-                    <select wire:model="layanan_id" id="layanan_id"
+                    <select wire:model.live="layanan_id" id="layanan_id"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Pilih Jenis Layanan</option>
                         @foreach ($categories as $layanan)
@@ -185,7 +158,7 @@
                 <!-- Kode Layanan -->
                 <div>
                     <label for="kode_layanan" class="block text-sm font-medium text-gray-700">Kode Layanan</label>
-                    <input wire:model="kode_layanan" type="text" id="kode_layanan"
+                    <input wire:model.live="kode_layanan" type="text" id="kode_layanan"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('kode_layanan')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -195,24 +168,9 @@
                 <!-- Nama Layanan -->
                 <div>
                     <label for="nama_layanan" class="block text-sm font-medium text-gray-700">Nama Layanan</label>
-                    <input wire:model="nama_layanan" type="text" id="nama_layanan"
+                    <input wire:model.live="nama_layanan" type="text" id="nama_layanan"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('nama_layanan')
-                        <span class="text-red-500 text-xs">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Harga Layanan -->
-                <div>
-                    <label for="harga_layanan" class="block text-sm font-medium text-gray-700">Harga Layanan</label>
-                    <div class="relative mt-1 rounded-md shadow-sm">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <span class="text-gray-500 sm:text-sm">Rp</span>
-                        </div>
-                        <input wire:model="harga_layanan" type="number" id="harga_layanan"
-                            class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500">
-                    </div>
-                    @error('harga_layanan')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                     @enderror
                 </div>
@@ -225,27 +183,6 @@
                     @error('deskripsi_layanan')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                     @enderror
-                </div>
-
-                <!-- Status -->
-
-                <div x-data="{ is_active: @entangle('is_active') }" class="mb-4 flex items-center">
-                    <label for="is_active" class="mr-4 text-sm font-medium text-gray-700">Status</label>
-                
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="is_active" id="is_active" class="sr-only peer">
-                        <div
-                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:bg-green-500 transition duration-300">
-                        </div>
-                        <div
-                            class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border rounded-full transition-all duration-300 peer-checked:translate-x-full peer-checked:border-white">
-                        </div>
-                    </label>
-                
-                    <span class="ml-3 text-sm font-medium"
-                        :class="{ 'text-green-600': is_active, 'text-red-600': !is_active }"
-                        x-text="is_active ? 'Aktif' : 'Tidak Aktif'">
-                    </span>
                 </div>
             </div>
 

@@ -2,22 +2,25 @@
 
 namespace App\Livewire\Rak;
 
-use Livewire\Component;
-use App\Models\Rak;
 use App\Models\Barang;
-use Livewire\WithPagination;
+use App\Models\Rak;
+use App\Models\StokRak;
 use Illuminate\Validation\Rule;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class RakIndex extends Component
 {
     use WithPagination;
 
+    public $title = 'Fayrooz | Data Rak';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
     public $sortDirection = 'asc';
     public $isModalOpen = false;
-    public $isDeleteModalOpen = false;
+    public $itemExist;
+    public $isDeleteModalOpen = false, $warningModal = false;
 
     // Form fields
     public $rak_id;
@@ -29,7 +32,7 @@ class RakIndex extends Component
 
     public function render()
     {
-        $items = Rak::with('barang')
+        $items = Rak::with('barang', 'createdBy', 'updatedBy')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('kode_rak', 'like', '%' . $this->search . '%')
@@ -39,7 +42,7 @@ class RakIndex extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-            $itemOptions = Barang::select('id', 'nama_barang')
+        $itemOptions = Barang::select('id', 'nama_barang')
             ->distinct()
             ->whereNotNull('nama_barang')
             ->get();
@@ -47,7 +50,9 @@ class RakIndex extends Component
         return view('livewire.rak.rak-index', [
             'items' => $items,
             'itemOptions' => $itemOptions,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatingSearch()
@@ -82,7 +87,14 @@ class RakIndex extends Component
         $this->rak_id = $id;
         $this->nama_rak = $item->nama_rak;
         $this->kode_rak = $item->kode_rak;
-        $this->isDeleteModalOpen = true;
+        $itemExist = StokRak::where('rak_id', $id)
+            ->where('jumlah_sisa', '>', 0)
+            ->exists();
+        if ($itemExist) {
+            $this->warningModal = true;
+        } else {
+            $this->isDeleteModalOpen = true;
+        }
     }
 
     public function closeDeleteModal()
@@ -113,6 +125,9 @@ class RakIndex extends Component
         $this->nama_rak = $item->nama_rak;
         $this->kapasitas = $item->kapasitas;
         $this->keterangan = $item->keterangan;
+        $this->itemExist = StokRak::where('rak_id', $id)
+            ->where('jumlah_sisa', '>', 0)
+            ->exists();
         $this->isModalOpen = true;
     }
 
@@ -121,7 +136,7 @@ class RakIndex extends Component
         $this->validate([
             'kode_rak' => [
                 'required',
-                Rule::unique('raks', 'kode_rak')->ignore($this->rak_id),
+                Rule::unique('rak', 'kode_rak')->ignore($this->rak_id),
             ],
             'id_barang' => 'required',
             'nama_rak' => 'required|string|max:255',
@@ -143,9 +158,12 @@ class RakIndex extends Component
         ];
 
         if ($this->rak_id) {
+            $data['updated_by'] = auth()->id();
             Rak::find($this->rak_id)->update($data);
             $message = 'Data barang berhasil diperbarui.';
         } else {
+            $data['created_by'] = auth()->id();
+            $data['updated_by'] = auth()->id();
             Rak::create($data);
             $message = 'Data barang berhasil ditambahkan.';
         }

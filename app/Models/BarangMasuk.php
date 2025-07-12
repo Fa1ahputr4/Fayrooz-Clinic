@@ -17,13 +17,10 @@ class BarangMasuk extends Model
         'id_barang',
         'kode_masuk',
         'jumlah',
-        'satuan',
         'tanggal_masuk',
         'batch_no',
         'exp_date',
-        'total_harga',
         'keterangan',
-        'is_delete',
     ];
 
     // Relasi dengan model Barang (BarangMasuk memiliki Barang)
@@ -37,9 +34,19 @@ class BarangMasuk extends Model
         return $this->hasMany(StokRak::class, 'barang_masuk_id');
     }
 
-        public function stokUmum()
+    public function stokUmum()
     {
         return $this->hasOne(StokUmum::class, 'barang_masuk_id');
     }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //Relasi user saat ubah data
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

@@ -241,65 +241,72 @@
     </div>
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             let chartInstance;
 
-            // Inisialisasi chart pertama kali
+            document.addEventListener('DOMContentLoaded', function() {
+                loadDashboardChart();
+            });
+
             document.addEventListener('livewire:navigated', function() {
-                // Hanya inisialisasi chart jika ada data
-                if (@json(array_sum($chartData['datasets'][0]['data']) + array_sum($chartData['datasets'][1]['data'])) > 0) {
+                loadDashboardChart();
+            });
+
+            function loadDashboardChart() {
+                const onDashboard = window.location.pathname.includes('dashboard');
+                if (!onDashboard) return;
+
+                const chartContainer = document.querySelector('.h-64');
+                if (!chartContainer) return;
+
+                const totalInitial =
+                    @json(array_sum($chartData['datasets'][0]['data']) + array_sum($chartData['datasets'][1]['data']));
+
+                if (totalInitial > 0) {
+                    // Pastikan canvas ada
+                    if (!chartContainer.querySelector('canvas')) {
+                        chartContainer.innerHTML = '<canvas id="visitsChart" wire:ignore></canvas>';
+                    }
+
                     initChart(@js($chartData));
+                    updateCounters(@js($chartData));
                 }
 
-                // Listen for updates
                 Livewire.on('chartUpdated', ({
                     data
                 }) => {
                     const totalData = data.datasets[0].data.reduce((a, b) => a + b, 0) +
                         data.datasets[1].data.reduce((a, b) => a + b, 0);
 
-                    const chartContainer = document.querySelector('.h-64');
-
                     if (totalData > 0) {
-                        // Jika ada data, tampilkan chart
+                        if (!chartContainer.querySelector('canvas')) {
+                            chartContainer.innerHTML = '<canvas id="visitsChart" wire:ignore></canvas>';
+                        }
+
                         if (!chartInstance) {
                             initChart(data);
                         } else {
                             updateChart(data);
                         }
-                        updateCounters(data);
 
-                        // Pastikan canvas ada dan pesan tidak ada data dihapus
-                        if (!chartContainer.querySelector('canvas')) {
-                            chartContainer.innerHTML = '<canvas id="visitsChart" wire:ignore></canvas>';
-                            initChart(data);
-                        }
+                        updateCounters(data);
                     } else {
-                        // Jika tidak ada data, tampilkan pesan
                         chartContainer.innerHTML =
                             '<div class="flex items-center justify-center h-full text-gray-500">Tidak ada data untuk ditampilkan</div>';
 
-                        // Hancurkan chart instance jika ada
                         if (chartInstance) {
                             chartInstance.destroy();
                             chartInstance = null;
                         }
                     }
                 });
-            });
-
-            // Handle navigasi halaman
-            document.addEventListener('livewire:navigated', function() {
-                if (!chartInstance && @json(array_sum($chartData['datasets'][0]['data']) + array_sum($chartData['datasets'][1]['data'])) > 0) {
-                    initChart(@js($chartData));
-                    updateCounters(@js($chartData));
-                }
-            });
+            }
 
             function initChart(data) {
                 const ctx = document.getElementById('visitsChart')?.getContext('2d');
                 if (!ctx) return;
+
+                if (chartInstance) chartInstance.destroy(); // Hancurkan jika sudah ada
 
                 chartInstance = new Chart(ctx, {
                     type: 'bar',
@@ -323,7 +330,7 @@
                         },
                         plugins: {
                             legend: {
-                                display: false // Sembunyikan legend karena sudah ada di counter
+                                display: false
                             },
                             tooltip: {
                                 callbacks: {
@@ -359,3 +366,141 @@
         </script>
     @endpush
 </div>
+{{-- <script>
+    let chartInstance;
+
+    function initChart(data) {
+        const ctx = document.getElementById('visitsChart')?.getContext('2d');
+        if (!ctx) return;
+
+        if (chartInstance) chartInstance.destroy(); // Reset kalau sudah ada chart lama
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateChart(data) {
+        if (!chartInstance) {
+            initChart(data);
+            return;
+        }
+
+        chartInstance.data.labels = data.labels;
+        chartInstance.data.datasets = data.datasets;
+        chartInstance.update();
+    }
+
+    function updateCounters(data) {
+        const umumTotal = data.datasets[0].data.reduce((a, b) => a + b, 0);
+        const beautycareTotal = data.datasets[1].data.reduce((a, b) => a + b, 0);
+
+        document.getElementById('umumCount').textContent = umumTotal;
+        document.getElementById('beautycareCount').textContent = beautycareTotal;
+        document.getElementById('totalCount').textContent = umumTotal + beautycareTotal;
+    }
+
+    function loadDashboardChart() {
+        const onDashboard = window.location.pathname.includes('dashboard');
+        if (!onDashboard) return;
+
+        const chartContainer = document.querySelector('.h-64');
+        if (!chartContainer) return;
+
+        const chartData = @js($chartData);
+
+        const totalInitial = chartData.datasets[0].data.reduce((a, b) => a + b, 0) +
+            chartData.datasets[1].data.reduce((a, b) => a + b, 0);
+
+        // Selalu buat canvas meskipun totalInitial == 0
+        if (!chartContainer.querySelector('canvas')) {
+            chartContainer.innerHTML = '<canvas id="visitsChart" wire:ignore></canvas>';
+        }
+
+        initChart(chartData);
+        updateCounters(chartData);
+
+        if (totalInitial === 0) {
+            // Tambahkan pesan jika tidak ada data
+            const notice = document.createElement('div');
+            notice.className = "text-center text-gray-500 text-sm mt-2";
+            notice.textContent = "Tidak ada data untuk ditampilkan";
+            chartContainer.appendChild(notice);
+        }
+    }
+
+    // DOM Ready
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(loadDashboardChart, 100);
+    });
+
+    // Jika pakai SPA/Livewire navigate
+    document.addEventListener('livewire:navigated', function() {
+        loadDashboardChart();
+    });
+
+    // Jika data diupdate secara dinamis
+    Livewire.on('chartUpdated', ({
+        data
+    }) => {
+        const chartContainer = document.querySelector('.h-64');
+        if (!chartContainer) return;
+
+        const totalData = data.datasets[0].data.reduce((a, b) => a + b, 0) +
+            data.datasets[1].data.reduce((a, b) => a + b, 0);
+
+        if (!chartContainer.querySelector('canvas')) {
+            chartContainer.innerHTML = '<canvas id="visitsChart" wire:ignore></canvas>';
+        }
+
+        if (totalData > 0) {
+            if (!chartInstance) {
+                initChart(data);
+            } else {
+                updateChart(data);
+            }
+
+            updateCounters(data);
+        } else {
+            chartContainer.innerHTML =
+                '<canvas id="visitsChart" wire:ignore></canvas><div class="text-center text-gray-500 text-sm mt-2">Tidak ada data untuk ditampilkan</div>';
+
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+        }
+    });
+    console.log("ChartData on load:", @js($chartData));
+</script> --}}

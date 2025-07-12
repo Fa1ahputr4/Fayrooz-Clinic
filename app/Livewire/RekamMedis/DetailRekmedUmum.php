@@ -18,6 +18,7 @@ use Livewire\Component;
 class DetailRekmedUmum extends Component
 {
 
+    public $title = 'Fayrooz | Detail Rekmed';
     public $pendaftaran;
     public $pendaftaranId;
     public $pasienId;
@@ -551,7 +552,9 @@ class DetailRekmedUmum extends Component
 
     public function render()
     {
-        return view('livewire.rekam-medis.detail-rekmed-umum')->extends('layouts.app');
+        return view('livewire.rekam-medis.detail-rekmed-umum')->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 }
 

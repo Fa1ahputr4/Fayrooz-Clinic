@@ -32,7 +32,7 @@ return [
         'items' => [
             ['label' => 'Obat & Produk', 'url' => 'barang', 'icon' => $icon['drug'], 'roles' => ['apoteker']],
             ['label' => 'User Management', 'url' => 'user', 'icon' => $icon['user'], 'roles' => []],
-            ['label' => 'Layanan', 'url' => 'layanan', 'icon' => $icon['service'], 'roles' => []],
+            ['label' => 'Layanan', 'url' => 'layanan', 'icon' => $icon['service'], 'roles' => ['resepsionis']],
             ['label' => 'Keluhan', 'url' => 'keluhan', 'icon' => $icon['complaint'], 'roles' => ['dokter']],
             ['label' => 'Diagnosis', 'url' => 'diagnosis', 'icon' => $icon['diagnosis'], 'roles' => ['dokter']],
         ],

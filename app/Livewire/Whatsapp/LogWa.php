@@ -11,6 +11,7 @@ class LogWa extends Component
 {
     use WithPagination;
 
+    public $title = 'Fayrooz | Log Pesan';
     public $search = '';
     public $perPage = 10;
     public $sortField = 'waktu_kirim';
@@ -93,7 +94,9 @@ class LogWa extends Component
 
         return view('livewire.whatsapp.log-wa', [
             'logs' => $logs
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function kirimUlang($id)

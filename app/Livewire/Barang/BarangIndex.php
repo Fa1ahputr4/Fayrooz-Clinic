@@ -2,15 +2,18 @@
 
 namespace App\Livewire\Barang;
 
-use Livewire\Component;
 use App\Models\Barang;
-use Livewire\WithPagination;
+use App\Models\BarangMasuk;
+use App\Models\StokRak;
 use Illuminate\Validation\Rule;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 
 class BarangIndex extends Component
 {
     use WithPagination;
+    public $title = 'Fayrooz | Barang'; 
 
     public $perPage = 10;
     public $search = '';
@@ -29,9 +32,13 @@ class BarangIndex extends Component
     public $created_at;
     public $updated_at;
 
+    public $canDelete = false;
+    public $existsInStokRak = false;
+    public $existsInBarangMasuk = false;
+    
     public function render()
     {
-        $items = Barang::query()
+        $items = Barang::with(['createdBy', 'updatedBy'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('kode_barang', 'like', '%' . $this->search . '%')
@@ -40,18 +47,20 @@ class BarangIndex extends Component
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
-    
+
         $satuanOptions = Barang::select('satuan')
             ->distinct()
             ->whereNotNull('satuan')
             ->pluck('satuan');
-    
+
         return view('livewire.barang.barang_index', [
             'items' => $items,
             'satuanOptions' => $satuanOptions,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
-    
+
 
     public function updatingSearch()
     {
@@ -77,7 +86,7 @@ class BarangIndex extends Component
     {
         $this->isModalOpen = false;
         $this->resetForm();
-        $this->resetErrorBag(); 
+        $this->resetErrorBag();
     }
 
     public function openDeleteModal($id)
@@ -86,6 +95,14 @@ class BarangIndex extends Component
         $this->barangId = $id;
         $this->nama_barang = $item->nama_barang;
         $this->kode_barang = $item->kode_barang;
+        $this->existsInBarangMasuk = BarangMasuk::where('id_barang', $id)->exists();
+
+        // Corrected: Check StokRak through BarangMasuk relationship
+        $this->existsInStokRak = StokRak::whereHas('barang_masuk', function ($query) use ($id) {
+            $query->where('id_barang', $id);
+        })->exists();
+
+        $this->canDelete = !$this->existsInStokRak && !$this->existsInBarangMasuk;
         $this->isDeleteModalOpen = true;
     }
 
@@ -114,7 +131,7 @@ class BarangIndex extends Component
         $this->barangId = $item->id;
         $this->kode_barang = $item->kode_barang;
         $this->nama_barang = $item->nama_barang;
-        $this->jenis =$item->jenis;
+        $this->jenis = $item->jenis;
         $this->satuan = $item->satuan;
         $this->jumlah_stok = $item->jumlah_stok;
         $this->isModalOpen = true;
@@ -127,7 +144,7 @@ class BarangIndex extends Component
         $this->validate([
             'kode_barang' => [
                 'required',
-                Rule::unique('raks', 'kode_rak')->ignore($this->kode_barang),
+                Rule::unique('rak', 'kode_rak')->ignore($this->kode_barang),
             ],
             'nama_barang' => 'required|string|max:255',
             'jenis' => 'required|string|max:255',
@@ -147,9 +164,12 @@ class BarangIndex extends Component
         ];
 
         if ($this->barangId) {
+            $data['updated_by'] = auth()->id();
             Barang::find($this->barangId)->update($data);
             $message = 'Data barang berhasil diperbarui.';
         } else {
+            $data['created_by'] = auth()->id();
+            $data['updated_by'] = auth()->id();
             Barang::create($data);
             $message = 'Data barang berhasil ditambahkan.';
         }
@@ -160,19 +180,19 @@ class BarangIndex extends Component
     }
 
     public function deleteBarang()
-{
-    $item = Barang::find($this->barangId);
+    {
+        $item = Barang::find($this->barangId);
 
-    if (!$item) {
-        $this->dispatch('flash-message', type: 'error', message: 'Barang tidak ditemukan.');
-        return;
+        if (!$item) {
+            $this->dispatch('flash-message', type: 'error', message: 'Barang tidak ditemukan.');
+            return;
+        }
+
+        $item->delete();
+
+        $this->dispatch('flash-message', type: 'success', message: 'Barang berhasil dihapus.');
+        $this->closeDeleteModal();
     }
-
-    $item->delete();
-
-    $this->dispatch('flash-message', type: 'success', message: 'Barang berhasil dihapus.');
-    $this->closeDeleteModal();
-}
 
 
     public function sortBy($field)

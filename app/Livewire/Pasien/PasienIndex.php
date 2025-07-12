@@ -18,6 +18,7 @@ class PasienIndex extends Component
 {
     use WithPagination;
 
+    public $title = 'Fayrooz | Data Pasien';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
@@ -53,7 +54,9 @@ class PasienIndex extends Component
 
         return view('livewire.pasien.pasien-index', [
             'patients' => $patients,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     //Fungsi untuk melakukan Sort berdasaran kolom tertentu
@@ -88,6 +91,12 @@ class PasienIndex extends Component
     //Fungsi untuk menghapus data pasien
     public function deletePatient()
     {
+        // Cek apakah user adalah admin
+        if (auth()->user()->role !== 'admin') {
+            $this->dispatch('flash-message', type: 'error', message: 'Anda tidak memiliki izin untuk menghapus data.');
+            return;
+        }
+
         $pasien = Pasien::find($this->pasienId);
 
         if ($pasien) {

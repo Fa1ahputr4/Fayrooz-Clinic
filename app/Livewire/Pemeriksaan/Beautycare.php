@@ -22,6 +22,7 @@ class Beautycare extends Component
 
     use WithFileUploads;
 
+    public $title = 'Fayrooz | Pemeriksaan';
     public $pendaftaran;
     public $pendaftaranId;
     public $pasienId;
@@ -654,6 +655,8 @@ class Beautycare extends Component
     }
     public function render()
     {
-        return view('livewire.pemeriksaan.beautycare')->extends('layouts.app');
+        return view('livewire.pemeriksaan.beautycare')->extends('layouts.app' , [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 }

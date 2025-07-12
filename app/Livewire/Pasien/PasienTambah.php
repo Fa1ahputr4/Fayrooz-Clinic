@@ -7,6 +7,7 @@ use App\Models\Pasien;
 
 class PasienTambah extends Component
 {
+    public $title = 'Fayrooz | Tambah Pasien';
     //Properti di halaman form pasien
     public $noRm, $nik, $nama, $jk = '', $tempatLahir, $tglLahir, $usia, $golDarah = '-', $alamat, $noTelp, $statusNikah = '', $catatan;
     public $pasienId = null;
@@ -48,7 +49,9 @@ class PasienTambah extends Component
 
         return view('livewire.pasien.pasien-tambah', [
             'pasien' => $pasien
-        ])->extends('layouts.app');;
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);;
     }
 
     //Aturan dan validasi pada input di form pasien
@@ -63,14 +66,14 @@ class PasienTambah extends Component
             'usia' => 'nullable|numeric',
             'golDarah' => 'nullable|string',
             'alamat' => 'required|string',
-            'noTelp' => 'required|numeric',
+            'noTelp' => 'nullable|numeric',
             'statusNikah' => 'nullable|string',
             'catatan' => 'nullable|string',
         ];
 
         if (!$this->pasienId) {
             // Jika pasienId tidak ada (tambah data), nomor_rm wajib unik
-            $rules['noRm'] = 'required|unique:pasiens,nomor_rm';
+            $rules['noRm'] = 'required|unique:pasien,nomor_rm';
         }
 
         return $rules;
@@ -101,12 +104,19 @@ class PasienTambah extends Component
     protected function generateNomorRM()
     {
         $today = now()->format('Ymd');
-        $last = Pasien::whereDate('created_at', now()->toDateString())
-            ->orderByDesc('id')->first();
+
+        // Cari nomor RM terakhir hari ini (termasuk yang sudah dihapus)
+        $lastRM = Pasien::withTrashed()
+            ->where('nomor_rm', 'like', 'RM-' . $today . '-%')
+            ->orderByDesc('nomor_rm')
+            ->first();
 
         $lastNumber = 1;
-        if ($last && preg_match('/(\d+)$/', $last->nomor_rm, $matches)) {
-            $lastNumber = intval($matches[1]) + 1;
+        if ($lastRM) {
+            // Ekstrak angka terakhir dari nomor RM
+            if (preg_match('/RM-' . $today . '-(\d+)$/', $lastRM->nomor_rm, $matches)) {
+                $lastNumber = (int)$matches[1] + 1;
+            }
         }
 
         return 'RM-' . $today . '-' . str_pad($lastNumber, 4, '0', STR_PAD_LEFT);

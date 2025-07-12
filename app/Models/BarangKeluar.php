@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BarangKeluar extends Model
 {
 
+    protected $table = 'barang_keluar';
     protected $fillable = [
         'tgl_keluar',
         'rak_id',
@@ -19,6 +20,8 @@ class BarangKeluar extends Model
         'status_keluar',
         'tanggal_keluar',
         'keterangan',
+        'createdBy',
+        'updatedBy'
     ];
 
     public function barang()
@@ -34,6 +37,22 @@ class BarangKeluar extends Model
     public function stok_rak()
     {
         return $this->belongsTo(StokRak::class);
+    }
+
+    public function stok_umum()
+    {
+        return $this->belongsTo(StokUmum::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //Relasi user saat ubah data
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // public function pasien()

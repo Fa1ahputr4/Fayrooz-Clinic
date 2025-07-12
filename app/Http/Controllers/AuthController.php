@@ -5,27 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
         // Validasi input
-        $credentials = $request->validate([
+        $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
+        ], [
+            'username.required' => 'Username wajib diisi',
+            'password.required' => 'Password wajib diisi',
         ]);
 
-        // Coba login menggunakan kolom username
-        if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
+        // Coba login
+        if (Auth::attempt($request->only('username', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard'); // Redirect jika berhasil login
+            return redirect()->intended('/dashboard');
         }
 
         // Jika gagal login
         return back()->withErrors([
-            'email' => 'Username atau password salah.',
-        ])->onlyInput('username');
+            'username' => 'Username atau password salah',
+            'password' => 'Username atau password salah',
+        ])->withInput($request->only('username'));
     }
 
     public function logout(Request $request)

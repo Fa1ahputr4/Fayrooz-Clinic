@@ -15,6 +15,7 @@ class AntrianIndex extends Component
 
     use WithPagination;
 
+    public $title = 'Fayrooz | Antrian Pemeriksaan';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
@@ -34,12 +35,18 @@ class AntrianIndex extends Component
     public $tgl_kunjungan;
     public $status;
     public $catatan;
+    public $tab = 'today'; // atau 'all'
+    public $dateRange = '';
+    public $startDate;
+    public $endDate;
+
 
     public function render()
     {
         $pendaftaran = Pendaftaran::query()
             ->with(['pasien', 'layanan'])
             ->whereDate('tanggal_kunjungan', Carbon::today()) // 🔍 hanya data hari ini
+            ->whereIn('status', ['diperiksa', 'selesai'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('kode_pendaftaran', 'like', '%' . $this->search . '%')
@@ -56,7 +63,9 @@ class AntrianIndex extends Component
         return view('livewire.pendaftaran.antrian-index', [
             'pendaftaran' => $pendaftaran,
             'daftarLayanan' => $daftarLayanan,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatedIdLayanan($value)

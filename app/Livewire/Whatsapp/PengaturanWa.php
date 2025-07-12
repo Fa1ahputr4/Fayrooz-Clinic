@@ -7,6 +7,7 @@ use Livewire\Component;
 
 class PengaturanWa extends Component
 {
+    public $title = 'Fayrooz | Pengaturan API WA';
     public $waApi; // Variabel untuk menampung data WA API
     public $waId, $nama, $urlApi, $token;
     public $isModalOpen = false;
@@ -56,7 +57,9 @@ class PengaturanWa extends Component
     {
         $this->waApi = WaApi::all(); // Ambil semua data
 
-        return view('livewire.whatsapp.pengaturan-wa', ['waApi' => $this->waApi])->extends('layouts.app');
+        return view('livewire.whatsapp.pengaturan-wa', ['waApi' => $this->waApi])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatingSearch()

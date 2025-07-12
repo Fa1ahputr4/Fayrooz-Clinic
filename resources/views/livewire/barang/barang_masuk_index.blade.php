@@ -1,15 +1,15 @@
 <div>
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#578FCA] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Barang Masuk</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('barang-masuk') }}" class="hover:underline">Data Barang Masuk</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#578FCA]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Barang Masuk</h2>
             <button wire:click.prevent="openModal"
@@ -18,100 +18,101 @@
         </div>
 
         <div>
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <select wire:model.live="perPage" class="border rounded rounded-lg">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                <!-- Bagian Kiri - Entri dan Date Range -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Data Entries -->
+                    <select wire:model.live="perPage" class="border border-gray-400 rounded-lg px-2 py-1 pr-5">
                         <option value="10">10 entri</option>
                         <option value="25">25 entri</option>
                         <option value="50">50 entri</option>
                         <option value="100">100 entri</option>
                     </select>
+
+                    <!-- Date Range -->
+                    <x-daterange :startDate="$startDate" :endDate="$endDate" wireStart="startDate" wireEnd="endDate"
+                        id="range1" />
+
+                    <!-- Reset Button -->
+                    <button x-show="@this.startDate && @this.endDate"
+                        @click="@this.set('startDate', null); @this.set('endDate', null); $('#range1').val('');"
+                        class="px-3 py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition">
+                        <i class="fas fa-times mr-1"></i> Reset
+                    </button>
                 </div>
-                <div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="(ID,Nama,Username)"
-                        class="input input-bordered w-full max-w-xs rounded-lg" />
+
+                <!-- Bagian Kanan - Pencarian -->
+                <div class="flex items-center gap-2">
+                     <button wire:click="exportExcel" wire:loading.attr="disabled" wire:loading.class="opacity-50"
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                            <span wire:loading.remove>
+                                <i class="fas fa-file-excel mr-1"></i> Excel
+                            </span>
+                            <span wire:loading>
+                                <i class="fas fa-spinner fa-spin mr-1"></i> Menyiapkan...
+                            </span>
+                        </button>
+                    <!-- Input Pencarian -->
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari..."
+                        class="border border-gray-400 px-3 py-1.5 rounded-full w-full" />
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-lg">
+            <div class="overflow-x-auto w-full">
                 <table class="table w-full text-sm text-center border border-[#2DAA9E]">
                     <thead class="bg-[#578FCA] bg-opacity-90 text-white">
                         <tr>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer">
+                            <th class="py-3 px-4">
                                 No
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('kode_barang')">
-                                Kode Barang
-                                @if ($sortField === 'kode_barang')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('nama_barang')">
-                                Nama Barang
-                                @if ($sortField === 'nama_barang')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('jumlah')">
-                                Jumlah masuk
-                                @if ($sortField === 'jumlah')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('tanggal_masuk')">
-                                Tanggal Masuk
-                                @if ($sortField === 'tanggal_masuk')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('keterangan')">
+                            <x-sortable-column field="kode_masuk" :currentField="$sortField" :currentDirection="$sortDirection"
+                                label="Kode Masuk" />
+                            <x-sortable-column field="id_barang" :currentField="$sortField" :currentDirection="$sortDirection"
+                                label="Nama Barang" />
+                            <x-sortable-column field="jumlah" :currentField="$sortField" :currentDirection="$sortDirection" label="Jumlah" />
+                            <x-sortable-column field="tanggal_masuk" :currentField="$sortField" :currentDirection="$sortDirection"
+                                label="Tanggal Masuk" />
+                            <th class="py-3 px-4">
                                 Keterangan
-                                @if ($sortField === 'keterangan')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Aksi</th>
+                            <th class="py-3 px-4">
+                                Dibuat Oleh
+                            </th>
+                            <th class="py-3 px-4">
+                                Terakhir Diubah
+                            </th>
+                            <th class="py-3 px-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($items as $index => $item)
                             <tr class="hover:bg-[#f3eaff] transition-all" wire:key="barang-{{ $item->id }}">
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                                <td class="py-2 px-4 border border-gray-300">
                                     {{ $items->firstItem() + $index }}
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]"> {{ $item->barang->kode_barang ?? '-' }}
+                                <td class="py-2 px-4 border border-gray-300">{{ $item->kode_masuk }}</td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $item->barang->nama_barang }}</div>
+                                    <div class="text-xs text-gray-500">{{ $item->barang->kode_barang }}</div>
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->barang->nama_barang }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->jumlah }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
-                                    {{ \Carbon\Carbon::parse($item->tanggal_masuk)->translatedFormat('d F Y') }}
+                                <td class="py-2 px-4 border border-gray-300">{{ $item->jumlah }}</td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    {{ \Carbon\Carbon::parse($item->tanggal_masuk)->locale('id')->isoFormat('D MMMM Y ') }}
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->keterangan }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                                <td class="py-2 px-4 border border-gray-300">{{ $item->keterangan ?? '-' }}</td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $item->createdBy->name ?? '-' }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ \Carbon\Carbon::parse($item->created_at)->locale('id')->isoFormat('D MMMM Y HH:mm') }}
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $item->updatedBy->name ?? '-' }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ \Carbon\Carbon::parse($item->updated_at)->locale('id')->isoFormat('D MMMM Y HH:mm') }}
+                                    </div>
+                                </td>
+                                <td class="py-2 px-4 border border-gray-300">
                                     <div class="flex justify-center items-center gap-2">
                                         <button wire:click="editBarangMasuk({{ $item->id }})"
                                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
@@ -123,15 +124,9 @@
                                             title="Hapus">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
-                                        <button wire:click="detailBarang({{ $item->id }})"
-                                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Detail">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
+
                                     </div>
                                 </td>
-
-
                             </tr>
                         @empty
                             <tr>
@@ -151,129 +146,96 @@
 
     <!-- Modal Form -->
     <x-modal wire:model="isModalOpen" title="{{ $isEdit ? 'Edit Barang Masuk' : 'Tambah Barang Masuk' }}">
-        <form wire:submit.prevent="saveBarang">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Kolom Kiri -->
-                <div class="space-y-4">
-                    <div>
-                        <label for="kode_masuk" class="block text-sm font-medium text-gray-700">Kode Barang Masuk</label>
-                        <input type="text" wire:model="kode_masuk" id="kode_masuk"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            readonly>
-                        @error('kode_masuk')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-    
-                    <div>
-                        <label for="barangId" class="block text-sm font-medium text-gray-700">Barang</label>
-                        <select wire:model="barangId" id="barangId"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                            <option value="">Pilih Barang</option>
-                            @foreach ($itemOptions as $item)
-                                <option value="{{ $item->id }}">{{ $item->nama_barang }}</option>
-                            @endforeach
-                        </select>
-                        @error('barangId')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-    
-                    <div>
-                        <label for="jumlah_masuk" class="block text-sm font-medium text-gray-700">Jumlah Barang</label>
-                        <input type="number" wire:model="jumlah_masuk" id="jumlah_masuk"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        @error('jumlah_masuk')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-    
-                    <div x-data="{
-                        displayHarga: '',
-                        formatRupiah(angka) {
-                            if (!angka) return '';
-                            angka = angka.toString().replace(/\D/g, '');
-                            return new Intl.NumberFormat('id-ID').format(angka);
-                        },
-                        init() {
-                            this.$watch('totalHargaLivewire', value => {
-                                this.displayHarga = this.formatRupiah(value);
-                            });
-                            this.displayHarga = this.formatRupiah(this.totalHargaLivewire);
-                        },
-                        updateHarga(e) {
-                            let angka = e.target.value.replace(/\D/g, '');
-                            this.displayHarga = this.formatRupiah(angka);
-                            this.totalHargaLivewire = angka;
-                        },
-                        totalHargaLivewire: @entangle('total_harga')
-                    }" x-init="init()">
-                        <label for="total_harga" class="block text-sm font-medium text-gray-700">Total Harga</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
-                            <input type="text" id="total_harga" x-model="displayHarga" @input="updateHarga"
-                                class="pl-10 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                inputmode="numeric">
-                        </div>
-                        @error('total_harga')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-    
-                <!-- Kolom Kanan -->
-                <div class="space-y-4">
-                    <div>
-                        <label for="batch_no" class="block text-sm font-medium text-gray-700">Nomor Batch</label>
-                        <input type="text" wire:model="batch_no" id="batch_no"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        @error('batch_no')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-    
-                    <div>
-                        <label for="exp_date" class="block text-sm font-medium text-gray-700">Exp date</label>
-                        <input type="date" wire:model="exp_date" id="exp_date"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        @error('exp_date')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-    
-                    <div>
-                        <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
-                        <input type="date" wire:model="tanggal_masuk" id="tanggal_masuk"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        @error('tanggal_masuk')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-    
-                    <div>
-                        <label for="keterangan" class="block text-sm font-medium text-gray-700">Keterangan</label>
-                        <input type="text" wire:model="keterangan" id="keterangan"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        @error('keterangan')
-                            <span class="text-red-500 text-xs">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-    
-            <!-- Tombol Aksi -->
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-4">
-                <button type="submit"
-                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#5e4a7e] text-base font-medium text-white hover:bg-[#4b3a65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
-                    Simpan
-                </button>
-                <button type="button" @click="isOpen = false" wire:click="closeModal"
-                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                    Batal
-                </button>
-            </div>
-        </form>
-    </x-modal>
+    <form wire:submit.prevent="saveBarang" class="space-y-4">
+        <!-- Kode Barang Masuk -->
+        <div>
+            <label for="kode_masuk" class="block text-sm font-medium text-gray-700 mb-1">Kode Barang Masuk</label>
+            <input type="text" wire:model="kode_masuk" id="kode_masuk"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                readonly>
+            @error('kode_masuk')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Pilih Barang -->
+        <div>
+            <label for="barangId" class="block text-sm font-medium text-gray-700 mb-1">Barang</label>
+            <select wire:model="barangId" id="barangId"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="">Pilih Barang</option>
+                @foreach ($itemOptions as $item)
+                    <option value="{{ $item->id }}">{{ $item->nama_barang }}</option>
+                @endforeach
+            </select>
+            @error('barangId')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Jumlah Barang -->
+        <div>
+            <label for="jumlah_masuk" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Barang</label>
+            <input type="number" wire:model="jumlah_masuk" id="jumlah_masuk"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            @error('jumlah_masuk')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Nomor Batch -->
+        <div>
+            <label for="batch_no" class="block text-sm font-medium text-gray-700 mb-1">Nomor Batch</label>
+            <input type="text" wire:model="batch_no" id="batch_no"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            @error('batch_no')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Tanggal Expired -->
+        <div>
+            <label for="exp_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Expired</label>
+            <input type="date" wire:model="exp_date" id="exp_date"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            @error('exp_date')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Tanggal Masuk -->
+        <div>
+            <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Masuk</label>
+            <input type="date" wire:model="tanggal_masuk" id="tanggal_masuk"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            @error('tanggal_masuk')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Keterangan -->
+        <div>
+            <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+            <textarea wire:model="keterangan" id="keterangan" rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+            @error('keterangan')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="pt-4 flex justify-end space-x-3">
+            <button type="button" wire:click="closeModal"
+                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Batal
+            </button>
+            <button type="submit"
+                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5e4a7e] hover:bg-[#4b3a65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Simpan
+            </button>
+        </div>
+    </form>
+</x-modal>
 
     <x-modal wire:model="isDeleteModalOpen" title="Hapus Data Barang">
         <div class="sm:flex sm:items-start">
@@ -287,7 +249,8 @@
             </div>
             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                 <p class="text-sm text-gray-500">
-                    Apakah Anda yakin ingin menghapus data dengan kode masuk <strong>{{ $kode_masuk }}</strong>? Data yang sudah dihapus akan dipindahkan ke sampah.
+                    Apakah Anda yakin ingin menghapus data dengan kode masuk <strong>{{ $kode_masuk }}</strong>? Data
+                    yang sudah dihapus akan dipindahkan ke sampah.
                 </p>
             </div>
         </div>

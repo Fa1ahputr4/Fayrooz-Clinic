@@ -12,10 +12,12 @@
     <div class="bg-white p-6 rounded-lg rounded-tl-none shadow ">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Data Pasien</h2>
-            <a wire:navigate.hover href="{{ route('pasien-tambah') }}"
-                class="bg-blue-500 hover:bg-blue-900 text-white px-3 py-2 rounded text-sm flex items-center">
-                Tambah Data
-            </a>
+            @if (in_array(auth()->user()->role, ['admin', 'resepsionis']))
+                <a wire:navigate.hover href="{{ route('pasien-tambah') }}"
+                    class="bg-blue-500 hover:bg-blue-900 text-white px-3 py-2 rounded text-sm flex items-center">
+                    Tambah Data
+                </a>
+            @endif
         </div>
 
         <div>
@@ -110,14 +112,13 @@
                                             <i class="fas {{ $isDokter ? 'fa-eye' : 'fa-edit' }}"></i>
                                         </a>
 
-                                        {{-- Tombol Hapus --}}
-                                        @unless ($isDokter)
+                                        @if (auth()->user()->role == 'admin')
                                             <button wire:click="openDeleteModal({{ $p->id }})"
                                                 class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
                                                 title="Hapus">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
-                                        @endunless
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

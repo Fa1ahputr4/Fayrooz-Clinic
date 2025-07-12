@@ -13,6 +13,7 @@ class DiagnosisIndex extends Component
 
     use WithPagination;
 
+    public $title = 'Fayrooz | Data Diagnosis';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
@@ -28,12 +29,12 @@ class DiagnosisIndex extends Component
     public function render()
     {
         // Ambil data detail layanan dengan relasi kategori
-        $diagnosis = Diagnosa::with('layanan')
+        $diagnosis = Diagnosa::with('layanan', 'createdBy', 'updatedBy')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('nama', 'like', '%' . $this->search . '%')
                         ->orWhereHas('layanan', function ($q) {
-                            $q->where('nama_layanan', 'like', '%' . $this->search . '%');
+                            $q->where('nama', 'like', '%' . $this->search . '%');
                         });
                 });
             })
@@ -46,7 +47,9 @@ class DiagnosisIndex extends Component
         return view('livewire.diagnosis.diagnosis-index', [
             'diagnosis' => $diagnosis,
             'categories' => $categories
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatingSearch()
@@ -122,7 +125,7 @@ class DiagnosisIndex extends Component
 
         $this->validate([
             'layananId' => 'required|exists:layanan,id',
-            'namaDiagnosis' => 'required|string|max:255|unique:diagnosas,nama,' . $this->diagnosisId,
+            'namaDiagnosis' => 'required|string|max:255|unique:diagnosis,nama,' . $this->diagnosisId,
             'deskripsi' => 'nullable|string',
         ], [
             'layanan_id.required' => 'Jenis layanan wajib dipilih.',
@@ -139,9 +142,12 @@ class DiagnosisIndex extends Component
         ];
 
         if ($this->diagnosisId) {
+            $data['updated_by'] = auth()->id();
             Diagnosa::find($this->diagnosisId)->update($data);
             $message = 'Data diagnosis berhasil diperbarui.';
         } else {
+            $data['created_by'] = auth()->id();
+            $data['updated_by'] = auth()->id();
             Diagnosa::create($data);
             $message = 'Data diagnosis berhasil ditambahkan.';
         }
