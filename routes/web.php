@@ -10,8 +10,9 @@ use App\Http\Middleware\RoleMiddleware;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
+
 
 Route::get('/login', fn() => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -27,7 +28,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', \App\Livewire\User\UserIndex::class)->name('user');
         });
 
-        Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)->name('layanan');
         Route::get('/whatsapp-api', \App\Livewire\Whatsapp\PengaturanWa::class)->name('whatsapp-api');
     });
 
@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware([RoleMiddleware::class . ':admin,apoteker,staff'])->group(function () {
         Route::get('/permintaan-resep', \App\Livewire\Resep\PermintaanResep::class)->name('permintaan-resep');
         Route::get('/permintaan-resep/detail/{id}', \App\Livewire\Resep\DetailPermintaan::class)->name('permintaan-resep-detail');
-        Route::get('/permintaan-produk-bc/detail/{id}', \App\Livewire\Resep\DetailPermintaanProdukBc::class)->name('permintaan-produk bc-detail');
+        Route::get('/permintaan-produk-bc/detail/{id}', \App\Livewire\Resep\DetailPermintaanProdukBc::class)->name('permintaan-produkbc-detail');
 
         Route::get('/barang', \App\Livewire\Barang\BarangIndex::class)->name('barang');
         Route::get('/barang-masuk', \App\Livewire\Barang\BarangMasukIndex::class)->name('barang-masuk');
@@ -52,6 +52,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pasien', \App\Livewire\Pasien\PasienIndex::class)
         ->middleware([RoleMiddleware::class . ':admin,resepsionis,dokter,terapis'])
         ->name('pasien');
+
+    Route::get('/layanan', \App\Livewire\Layanan\LayananIndex::class)
+        ->middleware([RoleMiddleware::class . ':admin,resepsionis'])
+        ->name('layanan');
 
     // === Tambah/Edit Pasien (admin, resepsionis only)
     Route::get('/pasien/tambah', \App\Livewire\Pasien\PasienTambah::class)
@@ -73,7 +77,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('antrian');
 
     // === Pemeriksaan dan Rekam Medis (admin, dokter, terapis)
-    Route::middleware([RoleMiddleware::class . ':admin,dokter,terapis'])->group(function () {
+    Route::middleware([RoleMiddleware::class . ':admin,dokter,terapis,resepsionis'])->group(function () {
         Route::get('/pemeriksaan/beautycare/{id}', \App\Livewire\Pemeriksaan\BeautyCare::class)->name('periksa-beautycare');
         Route::get('/pemeriksaan/umum/{id}', \App\Livewire\Pemeriksaan\KesehatanUmum::class)->name('periksa-umum');
 

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>{{ $title ?? 'Klinik Fayrooz' }}</title>
     <link rel="icon" href="{{ asset('images/icon.png') }}" type="image/x-icon">
 
     <!-- Tailwind & App Styles -->
@@ -93,6 +93,9 @@
     <script src="{{ asset('assets/js/virtualselect.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @livewireScripts
     @stack('scripts')

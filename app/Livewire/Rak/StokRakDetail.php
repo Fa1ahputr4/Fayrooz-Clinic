@@ -2,20 +2,27 @@
 
 namespace App\Livewire\Rak;
 
-use Livewire\Component;
 use App\Models\Barang;
+use App\Models\BarangKeluar;
 use App\Models\BarangMasuk;
 use App\Models\Rak;
 use App\Models\StokRak;
+use Carbon\Carbon;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class StokRakDetail extends Component
 {
+    use WithPagination;
 
+    public $title = 'Fayrooz | Stok Rak Detail';
     public $id;
     public $rak;
     public $stokRakDetail;
-    public $perPage1 = 5;
+    public $perPage = 10;
     public $search = '';
+    public $tab = 'barangMasuk';
+
 
     public function mount($id)
     {
@@ -25,16 +32,63 @@ class StokRakDetail extends Component
 
     public function render()
     {
-        $stokRakDetails = StokRak::with(['rak', 'barang_masuk']) // pastikan nama relasi sama
+        if ($this->tab === 'barangKeluar') {
+            $barangKeluarDetails = BarangKeluar::with(['stok_rak.barang_masuk', 'createdBy'])
+                ->whereHas('stok_rak', function ($query) {
+                    $query->where('rak_id', $this->id);
+                })
+                ->when($this->search, function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('status_keluar', 'like', '%' . $this->search . '%');
+                    });
+                })
+                ->orderBy('created_at', 'desc')
+                ->paginate($this->perPage);
+
+            return view('livewire.rak.stok-rak-detail', [
+                'barangKeluarDetails' => $barangKeluarDetails,
+                'stokRakDetails' => null, // Explicitly set to null
+            ])->extends('layouts.app');
+        }
+
+        // Default: Barang Masuk
+        $stokRakDetails = StokRak::with(['rak', 'barang_masuk', 'createdBy', 'updatedBy'])
             ->where('rak_id', $this->id)
-            ->whereHas('barang_masuk', function ($query) {
-                $query->where('kode_masuk', 'like', '%' . $this->search . '%');
+            ->when($this->search, function ($query) {
+                $query->whereHas('barang_masuk', function ($q) {
+                    $q->where('kode_masuk', 'like', '%' . $this->search . '%');
+                });
             })
             ->orderBy('created_at', 'desc')
-            ->paginate($this->perPage1);
+            ->paginate($this->perPage);
+
+        // Add status information
+        $stokRakDetails->getCollection()->transform(function ($item) {
+            $now = now();
+            $expDate = $item->barang_masuk->exp_date ? Carbon::parse($item->barang_masuk->exp_date) : null;
+
+            if (!$expDate) {
+                $item->status = 'Tidak Ada Info Expired';
+                $item->status_class = 'bg-gray-200 text-gray-800';
+            } elseif ($now->gt($expDate)) {
+                $item->status = 'Expired';
+                $item->status_class = 'bg-red-100 text-red-800';
+            } elseif ($now->diffInDays($expDate) <= 30) {
+                $item->status = 'Hampir Expired';
+                $item->status_class = 'bg-yellow-400 text-white';
+            } else {
+                $item->status = 'Baik';
+                $item->status_class = 'bg-green-100 text-green-800';
+            }
+
+            return $item;
+        });
 
         return view('livewire.rak.stok-rak-detail', [
             'stokRakDetails' => $stokRakDetails,
-        ])->extends('layouts.app');
+            'barangKeluarDetails' => null, // Explicitly set to null
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 }

@@ -9,6 +9,7 @@ use App\Models\BarangKeluar;
 
 class RiwayatBarang extends Component
 {
+    public $title = 'Fayrooz | Log Barang';
     public $id;
     public $barangDetail;
     public $perPage1 = 5;
@@ -30,7 +31,9 @@ class RiwayatBarang extends Component
             return view('livewire.barang.riwayat_barang', [
                 'barangMasuk' => $barangMasuk,
                 'barangDetails' => $this->barangDetail
-            ])->extends('layouts.app');
+            ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
             
     }
 }

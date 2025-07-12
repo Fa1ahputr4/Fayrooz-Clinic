@@ -42,6 +42,8 @@ class RekmedUmum extends Model
         'jadwal_kontrol',
         'catatan_tambahan',
         'catatan_jadwal',
+        'created_by',
+        'updated_by'
     ];
     public function keluhanUtamaPasien()
     {
@@ -71,5 +73,16 @@ class RekmedUmum extends Model
     public function diagnosa()
     {
         return $this->belongsTo(Diagnosa::class, 'id_diagnosa');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //Relasi user saat ubah data
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

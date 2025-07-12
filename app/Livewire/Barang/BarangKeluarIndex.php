@@ -2,25 +2,28 @@
 
 namespace App\Livewire\Barang;
 
-use Livewire\Component;
-use App\Models\BarangMasuk;
-use App\Models\BarangKeluar;
 use App\Models\Barang;
+use App\Models\BarangKeluar;
+use App\Models\BarangMasuk;
 use App\Models\Rak;
 use App\Models\StokRak;
 use App\Models\StokUmum;
-use Livewire\WithPagination;
+use function Laravel\Prompts\alert;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
-use Illuminate\Support\Carbon;
+use Livewire\Component;
 
-use function Laravel\Prompts\alert;
+use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\BarangKeluarExport;
 
 class BarangKeluarIndex extends Component
 {
 
     use WithPagination;
+    public $title = 'Fayrooz | Barang Keluar';
 
     public $perPage = 10;
     public $search = '';
@@ -45,6 +48,61 @@ class BarangKeluarIndex extends Component
     public $stok_rak_tersisa = 0;
     public $stok_barang_masuk_tersisa = 0;
     public bool $gunakanBarangMasuk = false;
+    public $dateRange = '';
+    public $startDate;
+    public $endDate;
+
+    public function exportExcel()
+    {
+        $query = BarangKeluar::with(['barang'])
+            ->whereNull('deleted_at')
+
+            // Filter pencarian
+            ->when($this->search, function ($q) {
+                $q->where(function ($q2) {
+                    $q2->where('kode_barang_masuk', 'like', "%{$this->search}%")
+                        ->orWhereHas('barang', function ($q3) {
+                            $q3->where('nama_barang', 'like', "%{$this->search}%")
+                                ->orWhere('kode_barang', 'like', "%{$this->search}%");
+                        });
+                });
+            })
+
+            // Filter tanggal
+            ->when($this->startDate, function ($q) {
+                $q->whereDate('tgl_keluar', '>=', $this->startDate);
+            })
+            ->when($this->endDate, function ($q) {
+                $q->whereDate('tgl_keluar', '<=', $this->endDate);
+            })
+
+            // Pengurutan
+            ->orderBy($this->sortField, $this->sortDirection);
+
+        // Tentukan nama file dinamis
+        if ($this->startDate && $this->endDate) {
+            \Carbon\Carbon::setLocale('id');
+            $start = \Carbon\Carbon::parse($this->startDate)->translatedFormat('d F Y');
+            $end = \Carbon\Carbon::parse($this->endDate)->translatedFormat('d F Y');
+            $filename = "data-barang-keluar {$start} - {$end}.xlsx";
+        } else {
+            $filename = 'data-barang-keluar semua.xlsx';
+        }
+
+        return Excel::download(new BarangKeluarExport($query), $filename);
+    }
+
+    public function resetDateFilter()
+    {
+        $this->reset(['startDate', 'endDate', 'dateRange']);
+        $this->resetPage();
+    }
+    public function dateRangeSelected($startDate, $endDate)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->resetPage();
+    }
 
     public function updatedGunakanBarangMasuk($value)
     {
@@ -164,8 +222,6 @@ class BarangKeluarIndex extends Component
         ]);
     }
 
-
-
     public function updatedSelectedBarang($barangId)
     {
         // Ambil rak yang sesuai dengan barang yang dipilih
@@ -203,14 +259,18 @@ class BarangKeluarIndex extends Component
 
     public function render()
     {
-        $items = BarangKeluar::with(['barang', 'rak', 'stok_rak'])
+        $query = BarangKeluar::with(['barang', 'rak', 'stok_rak'])
             ->when($this->search, function ($query) {
                 $query->whereHas('barang', function ($q) {
                     $q->where('kode_barang', 'like', '%' . $this->search . '%')
                         ->orWhere('nama_barang', 'like', '%' . $this->search . '%');
                 });
             })
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->when($this->startDate && $this->endDate, function ($query) {
+                $query->whereBetween('tgl_keluar', [$this->startDate, $this->endDate]);
+            });
+
+        $items = $query->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
         $itemOptions = Barang::select('id', 'nama_barang')
@@ -227,7 +287,9 @@ class BarangKeluarIndex extends Component
             'items' => $items,
             'itemOptions' => $itemOptions,
             'rakOptions' => $rakOptions,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
 
@@ -247,7 +309,7 @@ class BarangKeluarIndex extends Component
         $rules = [
             'tanggal_keluar' => 'required|date',
             'status' => 'required|in:rusak,expired,terpakai,lainya',
-            'selectedBarang' => 'required|exists:barangs,id',
+            'selectedBarang' => 'required|exists:barang,id',
             'jumlah_barang' => 'required|numeric|min:1',
             'keterangan' => 'nullable|string|max:255',
         ];
@@ -255,7 +317,7 @@ class BarangKeluarIndex extends Component
         $barang_masuk_id = null;
         $selectedOption = collect($this->barangMasukOptions)
             ->firstWhere('id', $this->barang_masuk_id);
-        
+
         $stokUmumId = $selectedOption['stok_umum_id'] ?? null;
 
         // Tambahkan validasi bersyarat
@@ -309,5 +371,16 @@ class BarangKeluarIndex extends Component
             'stok_rak_tersisa',
             'stok_barang_masuk_tersisa'
         ]);
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+
+        $this->sortField = $field;
     }
 }

@@ -1,32 +1,37 @@
 <div>
     <!-- Breadcrumbs -->
-    <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Log WhatsApp</a>
-            </li>
-        </ul>
+   <div class="text-sm breadcrumbs">
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('log-whatsapp') }}" class="hover:underline">Data Log Pesan WA</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Log WhatsApp</h2>
         </div>
 
         <div>
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                {{-- Data Entries --}}
                 <div>
-                    <select wire:model.live="perPage" class="border rounded rounded-lg">
+                    <select wire:model.live="perPage" class="border border-gray-400 rounded-lg px-2 py-1 pr-5">
                         <option value="10">10 entri</option>
                         <option value="25">25 entri</option>
                         <option value="50">50 entri</option>
                         <option value="100">100 entri</option>
                     </select>
+
                 </div>
-                <div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari (ID, Nama, Nomor)"
-                        class="input input-bordered w-full max-w-xs rounded-lg" />
+
+                {{-- Kolom Pencarian dan Tombol Export --}}
+                <div class="flex items-center gap-2 flex-wrap">
+                    {{-- Input Pencarian --}}
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari..."
+                        class="border border-gray-400 px-3 py-1.5 rounded-full w-full" />
                 </div>
             </div>
 
@@ -48,36 +53,36 @@
                 </ul>
             </div>
 
-            <div class="overflow-hidden rounded-lg">
+            <div class="overflow-x-auto w-full">
                 <table class="table w-full text-sm text-center border border-[#5e4a7e]">
-                    <thead class="bg-[#3b82f6] bg-opacity-90 text-white">
+                    <thead class="bg-[#578FCA] bg-opacity-90 text-white">
                         <tr>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">No</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">ID Rekam Medis</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Nama Pasien</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Nomor WhatsApp</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Waktu Kirim</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Status</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Aksi</th>
+                            <th class="py-3 px-4">No</th>
+                            <th class="py-3 px-4">ID Rekam Medis</th>
+                            <th class="py-3 px-4">Nama Pasien</th>
+                            <th class="py-3 px-4">Nomor WhatsApp</th>
+                            <th class="py-3 px-4">Waktu Kirim</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($logs as $index => $log)
                             <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-blue-50">
-                                <td class="py-3 px-4 border border-[#5e4a7e]">{{ $loop->iteration }}</td>
-                                <td class="py-3 px-4 border border-[#5e4a7e]">
+                                <td class="py-3 px-4 border border-gray-300">{{ $loop->iteration }}</td>
+                                <td class="py-3 px-4 border border-gray-300">
                                     {{ $activeTab === 'umum' ? $log->rekmed_umum_id : $log->rekmed_bc_id }}
                                 </td>
-                                <td class="py-3 px-4 border border-[#5e4a7e]">
+                                <td class="py-3 px-4 border border-gray-300">
                                     {{ $log->nama_pasien ?? 'N/A' }}
                                 </td>
-                                <td class="py-3 px-4 border border-[#5e4a7e]">
+                                <td class="py-3 px-4 border border-gray-300">
                                     {{ $log->nomor_wa }}
                                 </td>
-                                <td class="py-3 px-4 border border-[#5e4a7e]">
+                                <td class="py-3 px-4 border border-gray-300">
                                     {{ $log->waktu_kirim ? \Carbon\Carbon::parse($log->waktu_kirim)->format('d M Y H:i') : '-' }}
                                 </td>
-                                <td class="py-3 px-4 border border-[#5e4a7e]">
+                                <td class="py-3 px-4 border border-gray-300">
                                     <span
                                         class="px-2 py-1 rounded-full text-xs text-white
                                             {{ $log->status === 'sukses' ? 'bg-green-500' : ($log->status === 'gagal' ? 'bg-red-500' : 'bg-gray-400') }}">
@@ -85,7 +90,7 @@
                                     </span>
                                 </td>
 
-                                <td class="py-3 px-4 border border-[#5e4a7e]">
+                                <td class="py-3 px-4 border border-gray-300">
                                     <div class="flex justify-center space-x-2">
                                         <button wire:click="infoDetail({{ $log->id }})"
                                             class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
@@ -102,7 +107,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="py-4 px-4 border border-[#5e4a7e] text-gray-500">
+                                <td colspan="8" class="py-4 px-4 border border-gray-300 text-gray-500">
                                     Tidak ada data log WhatsApp
                                 </td>
                             </tr>

@@ -1,15 +1,15 @@
 <div>
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#578FCA] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Barang Keluar</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('barang-keluar') }}" class="hover:underline">Data Barang Keluar</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#578FCA]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Barang Keluar</h2>
             <button wire:click.prevent="openModal"
@@ -18,102 +18,86 @@
         </div>
 
         <div>
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <select wire:model.live="perPage" class="border rounded rounded-lg">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                <!-- Bagian Kiri - Entri dan Date Range -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Data Entries -->
+                    <select wire:model.live="perPage" class="border border-gray-400 rounded-lg px-2 py-1 pr-5">
                         <option value="10">10 entri</option>
                         <option value="25">25 entri</option>
                         <option value="50">50 entri</option>
                         <option value="100">100 entri</option>
                     </select>
+
+                    <!-- Date Range -->
+                    <x-daterange :startDate="$startDate" :endDate="$endDate" wireStart="startDate" wireEnd="endDate"
+                        id="range1" />
+
+                    <!-- Reset Button -->
+                    <button x-show="@this.startDate && @this.endDate"
+                        @click="@this.set('startDate', null); @this.set('endDate', null); $('#range1').val('');"
+                        class="px-3 py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition">
+                        <i class="fas fa-times mr-1"></i> Reset
+                    </button>
                 </div>
-                <div>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="(ID,Nama,Username)"
-                        class="input input-bordered w-full max-w-xs rounded-lg" />
+
+                <!-- Bagian Kanan - Pencarian -->
+                <div class="flex items-center gap-2">
+                    <button wire:click="exportExcel" wire:loading.attr="disabled" wire:loading.class="opacity-50"
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                            <span wire:loading.remove>
+                                <i class="fas fa-file-excel mr-1"></i> Excel
+                            </span>
+                            <span wire:loading>
+                                <i class="fas fa-spinner fa-spin mr-1"></i> Menyiapkan...
+                            </span>
+                        </button>
+                    <!-- Input Pencarian -->
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari..."
+                        class="border border-gray-400 px-3 py-1.5 rounded-full w-full" />
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-lg">
+            <div class="overflow-x-auto w-full">
                 <table class="table w-full text-sm text-center border border-[#2DAA9E]">
                     <thead class="bg-[#578FCA] bg-opacity-90 text-white">
                         <tr>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer">
+                            <th class="py-3 px-4">
                                 No
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('kode_barang')">
-                                Kode Barang
-                                @if ($sortField === 'kode_barang')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
+                            <x-sortable-column field="nama_barang" :currentField="$sortField" :currentDirection="$sortDirection"
+                                label="Nama Barang" />
+                            
+                            <th class="py-3 px-4">
+                                Jumlah
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('nama_barang')">
-                                Nama Barang
-                                @if ($sortField === 'nama_barang')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer" wire:click="sortBy('jumlah')">
-                                No Produk
-                                @if ($sortField === 'jumlah')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
-                            </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('tanggal_masuk')">
+                            <th class="py-3 px-4">
                                 Tanggal Keluar
-                                @if ($sortField === 'tanggal_masuk')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e] cursor-pointer"
-                                wire:click="sortBy('keterangan')">
+                            <th class="py-3 px-4">
                                 Alasan
-                                @if ($sortField === 'keterangan')
-                                    @if ($sortDirection === 'asc')
-                                        ↑
-                                    @else
-                                        ↓
-                                    @endif
-                                @endif
                             </th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Keterangan</th>
-                            <th class="py-3 px-4 border border-[#5e4a7e]">Aksi</th>
+                            <th class="py-3 px-4">Keterangan</th>
+                            {{-- <th class="py-3 px-4">Aksi</th> --}}
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($items as $index => $item)
                             <tr class="hover:bg-[#f3eaff] transition-all" wire:key="barang-{{ $item->id }}">
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                                <td class="py-2 px-4 border border-gray-300">
                                     {{ $items->firstItem() + $index }}
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]"> {{ $item->barang->kode_barang ?? '-' }}
+                                <td class="py-2 px-4 border border-gray-300">
+                                    <div class="font-medium text-gray-800">{{ $item->barang->nama_barang }}</div>
+                                    <div class="text-xs text-gray-500">{{ $item->barang->kode_barang }}</div>
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->barang->nama_barang }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->jumlah }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
-                                    {{ \Carbon\Carbon::parse($item->tanggal_masuk)->translatedFormat('d F Y') }}
+                                <td class="py-2 px-4 border border-gray-300">{{ $item->jumlah }}</td>
+                                <td class="py-2 px-4 border border-gray-300">
+                                    {{ \Carbon\Carbon::parse($item->tgl_keluar)->translatedFormat('d F Y') }}
                                 </td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->status_keluar }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">{{ $item->keterangan }}</td>
-                                <td class="py-2 px-4 border border-[#5e4a7e]">
+                                <td class="py-2 px-4 border border-gray-300">{{ $item->status_keluar }}</td>
+                                <td class="py-2 px-4 border border-gray-300">{{ $item->keterangan }}</td>
+                                {{-- <td class="py-2 px-4 border border-gray-300">
                                     <div class="flex justify-center items-center gap-2">
                                         <button wire:click="editBarangMasuk({{ $item->id }})"
                                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
@@ -125,14 +109,9 @@
                                             title="Hapus">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
-                                        <button wire:click="detailBarang({{ $item->id }})"
-                                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm flex items-center gap-1"
-                                            title="Detail">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
+                    
                                     </div>
-                                </td>
-
+                                </td> --}}
 
                             </tr>
                         @empty
@@ -280,7 +259,6 @@
                     Stok tersedia:
                     @if ($selectedRak && $stok_rak_id)
                         {{ $stok_rak_tersisa }} pcs (dari barang masuk ini di rak terpilih)
-                   
                     @elseif ($barang_masuk_id)
                         {{ $stok_barang_masuk_tersisa }} pcs (dari barang masuk)
                     @else

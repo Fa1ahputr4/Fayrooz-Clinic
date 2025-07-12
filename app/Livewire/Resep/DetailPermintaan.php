@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class DetailPermintaan extends Component
 {
 
+    public $title = 'Fayrooz | Detai Resep';
     public $isModalOpen = false;
     public $historyId;
     public $selectedHistory;
@@ -74,7 +75,9 @@ class DetailPermintaan extends Component
     }
     public function render()
     {
-        return view('livewire.resep.detail-permintaan')->extends('layouts.app');
+        return view('livewire.resep.detail-permintaan')->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function openConfirmModal($id)

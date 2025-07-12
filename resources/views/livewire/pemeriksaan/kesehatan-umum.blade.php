@@ -1,15 +1,17 @@
 <div>
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Pemeriksaan</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('antrian') }}" class="hover:underline">Antrian Pasien</a>
+            <span class="mx-1">></span>
+            <a href="" class="hover:underline">Pemeriksan Pasien</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-[#5e4a7e]">Pemeriksaan</h2>
             {{-- <button wire:click.prevent="openModal"
@@ -18,7 +20,7 @@
         </div>
 
         <div>
-            <div class="mb-6 p-4 bg-gray-50 border border-blue-300 rounded-lg shadow-sm">
+            <div class="mb-6 p-4 bg-gray-50 border border-[#578FCA] rounded-lg shadow-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                     <!-- Baris 1 -->
                     <div class="flex">
@@ -90,35 +92,78 @@
 
                 <!-- Tab Content -->
                 <div class="bg-white rounded-b-xl shadow p-6 border border-t-0 border-gray-200 w-full">
-                    <div x-show="tab === 'riwayat'" x-cloak>
-                        <div class="overflow-x-auto border rounded-md">
-                            <table class="min-w-full bg-white text-sm">
-                                <thead class="bg-gray-100 text-gray-700">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left">Tanggal Kunjungan</th>
-                                        <th class="px-4 py-2 text-left">Jenis Layanan</th>
-                                        <th class="px-4 py-2 text-left">Diagnosa</th>
-                                        <th class="px-4 py-2 text-left">Tindakan</th>
-                                        <th class="px-4 py-2 text-left">Dokter</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-gray-800">
-                                    {{-- @forelse ($riwayat as $item)
-                                        <tr class="border-t">
-                                            <td class="px-4 py-2">{{ $item->tanggal->format('d-m-Y') }}</td>
-                                            <td class="px-4 py-2">{{ $item->keluhan }}</td>
-                                            <td class="px-4 py-2">{{ $item->diagnosa }}</td>
-                                            <td class="px-4 py-2">{{ $item->tindakan }}</td>
-                                            <td class="px-4 py-2">{{ $item->dokter->nama ?? '-' }}</td>
-                                        </tr>
+                    <div x-show="tab === 'riwayat'" x-cloak class="space-y-6">
+                        <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 mr-2" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            Riwayat Kunjungan Pasien
+                        </h3>
+
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500 mb-2">Kunjungan Terakhir</h4>
+                                    @if ($pendaftaran)
+                                        <p class="text-gray-800 font-medium">
+                                            {{ \Carbon\Carbon::parse($pendaftaran->first()->tgl_kunjungan)->translatedFormat('d F Y') }}
+                                        </p>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            {{ $pendaftaran->first()->layananDetail->nama_layanan ?? '-' }}
+                                        </p>
+                                    @else
+                                        <p class="text-gray-600">Belum ada kunjungan</p>
+                                    @endif
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-500 mb-2">Total Kunjungan</h4>
+                                    <p class="text-gray-800 font-medium">{{ $totalKunjungan }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <h4 class="text-sm font-medium text-gray-500 mb-3">Riwayat Lengkap</h4>
+                                <div class="space-y-4">
+                                    @forelse ($riwayatRekmed as $rekmed)
+                                        <div class="flex items-start border-l-4 border-indigo-200 pl-4 py-2">
+                                            <div
+                                                class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center mr-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-grow">
+                                                <p class="text-sm font-medium text-gray-900">
+                                                    {{ \Carbon\Carbon::parse($rekmed->created_at)->translatedFormat('d F Y') }}
+                                                </p>
+                                                <p class="text-sm text-gray-600">
+                                                    {{ $rekmed->pendaftaran->layananDetail->nama_layanan ?? '-' }}
+                                                    - Diagnosa: {{ $rekmed->diagnosa->nama ?? '-' }}
+                                                </p>
+                                            </div>
+                                            <div class="flex-shrink-0 ml-4">
+                                                {{-- <button wire:click="openDetail('{{ $rekmed->id }}')"
+                                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Detail
+                                                </button> --}}
+                                            </div>
+                                        </div>
                                     @empty
-                                        <tr>
-                                            <td colspan="5" class="px-4 py-4 text-center text-gray-500">Belum ada
-                                                riwayat kunjungan.</td>
-                                        </tr>
-                                    @endforelse --}}
-                                </tbody>
-                            </table>
+                                        <p class="text-sm text-gray-600">Belum ada riwayat rekam medis.</p>
+                                    @endforelse
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -179,7 +224,8 @@
                             <!-- Riwayat Penyakit Keluarga -->
                             <div class="flex flex-col">
                                 <label class="text-gray-700 font-semibold mb-1">Riwayat Penyakit Keluarga</label>
-                                <textarea wire:model.live="riwayatKeluarga" class="w-full border border-gray-300 rounded-md px-3 py-2 h-24 resize-none"
+                                <textarea wire:model.live="riwayatKeluarga"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 h-24 resize-none"
                                     placeholder="Riwayat penyakit keluarga"></textarea>
                             </div>
 
@@ -415,13 +461,20 @@
 
                                     <!-- Toggle Kirim WhatsApp -->
                                     <div class="flex flex-col">
-                                        <label class="text-gray-700 font-semibold mb-1">Kirim WhatsApp</label>
+                                        <label class="text-gray-700 font-semibold mb-1">Kirim WhatsApp
+                                            @if (!$adaWaApiAktif)
+                                                <span class="text-red-500 text-xs italic">(API tidak
+                                                    aktif)</span>
+                                            @endif
+                                        </label>
+
                                         <div class="flex items-center mt-2">
                                             <button type="button"
                                                 @click="
-                            kirimWa = !kirimWa;
-                            $wire.set('kirimWa', kirimWa);
-                        "
+                                                    kirimWa = !kirimWa;
+                                                    $wire.set('kirimWa', kirimWa);
+                                                "
+                                                :disabled="{{ $adaWaApiAktif ? 'false' : 'true' }}"
                                                 :class="kirimWa ? 'bg-green-500' : 'bg-gray-300'"
                                                 class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none">
                                                 <span :class="kirimWa ? 'translate-x-6' : 'translate-x-1'"

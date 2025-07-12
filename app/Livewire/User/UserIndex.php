@@ -13,6 +13,7 @@ class UserIndex extends Component
 {
     use WithPagination;
 
+    public $title = 'Fayrooz | Data User';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
@@ -45,7 +46,9 @@ class UserIndex extends Component
 
         return view('livewire.user.user-management', [
             'users' => $users,
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatingSearch()

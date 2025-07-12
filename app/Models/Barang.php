@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Barang extends Model
 {
-    protected $fillable = ['kode_barang', 'nama_barang', 'satuan', 'jumlah_stok', 'jenis'];
+    protected $table = 'barang';
+    protected $fillable = ['kode_barang', 'nama_barang', 'satuan', 'jumlah_stok', 'jenis', 'created_by', 'updated_by'];
 
     public function riwayatMasuk()
     {
@@ -46,5 +47,16 @@ class Barang extends Model
     public function layanan()
     {
         return $this->belongsTo(Layanan::class, 'layanan_id'); // asumsi kolom ini ada
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //Relasi user saat ubah data
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

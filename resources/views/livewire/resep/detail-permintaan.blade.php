@@ -1,18 +1,22 @@
 <div>
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li><a href="/dashboard" class="text-white">Fayrooz</a></li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('permintaan-resep') }}" class="hover:underline">Permintaan Resep</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('permintaan-resep-detail', ['id' => $history->id]) }}" class="hover:underline">Detail Resep</a>
+        </div>
     </div>
 
     <!-- Konten Utama -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <h2 class="text-2xl font-semibold text-[#5e4a7e] mb-6">Detail Permintaan Resep</h2>
 
         <!-- Data Pasien -->
         <div class="bg-gray-50 p-4 rounded-lg border mb-6 shadow-sm">
-            <h3 class="font-semibold text-[#3b82f6] text-lg mb-2">Informasi Pasien</h3>
+            <h3 class="font-semibold text-[#578FCA] text-lg mb-2">Informasi Pasien</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                 <div><strong>Nama :</strong> {{ $history->pasien->nama_lengkap ?? '-' }}</div>
                 <div><strong>Jenis Kelamin :</strong>
@@ -31,7 +35,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
             <!-- Subjektif -->
             <div class="bg-gray-50 p-4 rounded-lg border shadow-sm">
-                <h3 class="font-semibold text-[#3b82f6] mb-2">Subjektif</h3>
+                <h3 class="font-semibold text-[#578FCA] mb-2">Subjektif</h3>
 
                 {{-- Keluhan Utama (keluhan_umum adalah relasi hasMany misalnya) --}}
                 @if ($history->keluhanUtamaPasien->isEmpty())
@@ -55,7 +59,7 @@
 
             <!-- Objektif -->
             <div class="bg-gray-50 p-4 rounded-lg border shadow-sm">
-                <h3 class="font-semibold text-[#3b82f6] mb-2">Objektif</h3>
+                <h3 class="font-semibold text-[#578FCA] mb-2">Objektif</h3>
                 <p class="mb-1"><strong>Tekanan Darah :</strong>
                     {{ $history->sistolik && $history->diastolik ? "$history->sistolik/$history->diastolik mmHg" : '-' }}
                 </p>
@@ -73,7 +77,7 @@
 
             <!-- Asesmen -->
             <div class="bg-gray-50 p-4 rounded-lg border shadow-sm">
-                <h3 class="font-semibold text-[#3b82f6] mb-2">Asesmen</h3>
+                <h3 class="font-semibold text-[#578FCA] mb-2">Asesmen</h3>
                 <p class="mb-1"><strong>Diagnosa Utama :</strong> {{ $history->diagnosa->nama ?? '-' }}</p>
                 <p class="mb-1"><strong>Catatan Diagnosa Utama :</strong>
                     {{ $history->keterangan_diagnosa_utama ?? '-' }}</p>
@@ -94,7 +98,7 @@
 
             <!-- Plan -->
             <div class="bg-gray-50 p-4 rounded-lg border shadow-sm">
-                <h3 class="font-semibold text-[#3b82f6] mb-2">Plan</h3>
+                <h3 class="font-semibold text-[#578FCA] mb-2">Plan</h3>
                 <p class="mb-1"><strong>Tindakan :</strong> {{ $history->tindakan ?? '-' }}</p>
                 <p class="mb-1">
                     <strong>Kontrol Ulang :</strong>
@@ -113,10 +117,10 @@
 
         <!-- Resep Obat -->
         <div class="mt-8">
-            <h3 class="font-semibold text-lg mb-2 text-[#3b82f6]">Resep Obat</h3>
+            <h3 class="font-semibold text-lg mb-2 text-[#578FCA]">Resep Obat</h3>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm table-auto border border-[#ccc] shadow-sm rounded">
-                    <thead class="bg-[#3b82f6] text-white">
+                    <thead class="bg-[#578FCA] text-white">
                         <tr>
                             <th class="py-2 px-3 border">Nama Obat</th>
                             <th class="py-2 px-3 border">Jumlah</th>

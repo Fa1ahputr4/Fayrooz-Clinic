@@ -21,6 +21,7 @@ class DetailRekmedBeautycare extends Component
 
     use WithFileUploads;
 
+    public $title = 'Fayrooz | Detail Rekmed';
     public $pendaftaran;
     public $pendaftaranId;
     public $pasienId;
@@ -583,6 +584,8 @@ class DetailRekmedBeautycare extends Component
     }
     public function render()
     {
-        return view('livewire.rekam-medis.detail-rekmed-beautycare')->extends('layouts.app');
+        return view('livewire.rekam-medis.detail-rekmed-beautycare')->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 }

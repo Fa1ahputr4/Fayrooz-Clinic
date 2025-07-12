@@ -1,24 +1,34 @@
-<div>
+<div class="{{ auth()->user()->role != 'admin' ? 'disabled-container' : '' }}">
+    <style>
+        .disabled-container :is(input, textarea, select, button):not([disabled]):not(.no-disable) {
+            pointer-events: none;
+            opacity: 0.6;
+            background-color: #f3f4f6;
+        }
+    </style>
+
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs">
-        <ul class="bg-[#3b82f6] px-4 py-2 rounded-t-lg w-max text-white">
-            <li>
-                <a href="/dashboard" class="text-white">Fayrooz > Pemeriksaan</a>
-            </li>
-        </ul>
+        <div class="text-sm px-4 py-2 rounded-t-lg w-max bg-[#578FCA] text-white">
+            <a href="{{ route('dashboard') }}" class="hover:underline">Fayrooz</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('pasien') }}" class="hover:underline">Data Rekam Medis</a>
+            <span class="mx-1">></span>
+            <a href="{{ route('pasien') }}" class="hover:underline">Detail Rekam Medis</a>
+        </div>
     </div>
 
     <!-- Konten -->
-    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow border border-[#3b82f6]">
+    <div class="bg-white p-6 rounded-lg rounded-tl-none shadow">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-[#5e4a7e]">Pemeriksaan</h2>
+            <h2 class="text-2xl font-semibold text-[#5e4a7e]">Data Rekam Medis</h2>
             {{-- <button wire:click.prevent="openModal"
                 class="bg-blue-500 hover:bg-blue-900 text-white px-3 py-2 rounded text-sm flex items-center">Tambah
                 Data</button> --}}
         </div>
 
         <div>
-            <div class="mb-6 p-4 bg-gray-50 border border-blue-300 rounded-lg shadow-sm">
+            <div class="mb-6 p-4 bg-gray-50 border border-[#578FCA] rounded-lg shadow-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                     <!-- Baris 1 -->
                     <div class="flex">
@@ -74,10 +84,10 @@
             <div x-data="{ tab: 'anamnesis' }" class="mt-8 w-full">
                 <!-- Tabs -->
                 <div class="flex bg-gray-100 rounded-t-xl overflow-hidden border border-b-0 border-gray-200 w-full">
-                    <template
-                        x-for="item in ['anamnesis', 'pemeriksaan', 'diagnosa', 'tindakan & resep', 'selesai']"
+                    <template x-for="item in ['anamnesis', 'pemeriksaan', 'diagnosa', 'tindakan & resep', 'selesai']"
                         :key="item">
-                        <button @click="tab = item" class="px-5 py-3 text-sm font-medium transition duration-200"
+                        <button @click="tab = item"
+                            class="px-5 py-3 text-sm font-medium transition duration-200 no-disable"
                             :class="{
                                 'bg-white text-gray-900 font-semibold border border-b-0 border-gray-200 rounded-t-xl': tab ===
                                     item,
@@ -98,11 +108,13 @@
                                 <label class="text-gray-700 font-semibold mb-1">Keluhan Utama</label>
                                 <div wire:ignore>
                                     <select id="keluhanUtama" multiple
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 h-11">
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 h-11"
+                                        @if (auth()->user()->role !== 'admin') disabled @endif>
                                         @foreach ($daftarKeluhan as $id => $nama)
                                             <option value="{{ $id }}">{{ $nama }}</option>
                                         @endforeach
                                     </select>
+
                                 </div>
 
                                 <textarea wire:model.live="keteranganKeluhan"
@@ -275,12 +287,14 @@
                                 <label class="text-gray-700 font-semibold mb-1">Diagnosa Utama</label>
                                 <div wire:ignore>
                                     <select id="diagnosa_utama"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2">
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        @if (auth()->user()->role !== 'admin') disabled @endif>
                                         <option value="">Pilih Diagnosa</option>
                                         @foreach ($daftarDiagnosisUmum as $id => $nama)
                                             <option value="{{ $id }}">{{ $nama }}</option>
                                         @endforeach
                                     </select>
+
                                 </div>
                                 <textarea wire:model.live="keteranganUtama" name="keterangan_diagnosa_utama" id="keterangan_diagnosa_utama"
                                     class="w-full border border-gray-300 px-3 py-2" placeholder="Keterangan diagnosa utama (opsional)"></textarea>
@@ -305,7 +319,8 @@
                             <label class="text-gray-700 font-semibold mb-1">Diagnosa Tambahan (Jika Ada)</label>
                             <div wire:ignore>
                                 <select id="diagnosa_tambahan" multiple
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2">
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2"
+                                     @if (auth()->user()->role !== 'admin') disabled @endif>
                                     @foreach ($daftarDiagnosisUmum as $id => $nama)
                                         <option value="{{ $id }}">{{ $nama }}</option>
                                     @endforeach
@@ -422,7 +437,8 @@
                                         <td class="p-2 border">
                                             <div wire:ignore>
                                                 <select id="resep_obat" wire:model="obat"
-                                                    class="w-full p-1 border border-gray-400 rounded">
+                                                    class="w-full p-1 border border-gray-400 rounded"
+                                                     @if (auth()->user()->role !== 'admin') disabled @endif>
                                                     <option value="">Pilih Obat</option>
                                                     @foreach ($this->obatList as $item)
                                                         <option value="{{ $item->id }}"
@@ -518,10 +534,7 @@
                         </div>
 
                         <div class="text-right">
-                            <button wire:click="save"
-                                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                                Simpan Rekam Medis
-                            </button>
+
                         </div>
                     </div>
                 </div>

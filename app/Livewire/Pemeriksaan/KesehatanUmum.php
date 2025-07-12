@@ -20,6 +20,7 @@ use Livewire\Component;
 class KesehatanUmum extends Component
 {
 
+    public $title = 'Fayrooz | Pemeriksaan';
     public $pendaftaran;
     public $pendaftaranId;
     public $pasienId;
@@ -35,6 +36,25 @@ class KesehatanUmum extends Component
     protected $listeners = ['input-updated' => '$refresh'];
 
     public  $stokObat = 0,  $jumlahObatError = null;
+    public $adaWaApiAktif, $totalKunjungan, $riwayatRekmed;
+    public $showDetailModal = false;
+    public $selectedRekmed;
+
+    public function openDetail($rekmedId)
+    {
+        $this->selectedRekmed = RekmedUmum::with([
+            'pendaftaran.layananDetail',
+            'diagnosa',
+            'createdBy'
+        ])->findOrFail($rekmedId);
+
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetail()
+    {
+        $this->showDetailModal = false;
+    }
 
     public function updatedNomorKontrol($value)
     {
@@ -92,19 +112,25 @@ class KesehatanUmum extends Component
 
             if ($rekmed) {
                 if (!is_numeric($this->diagnosisUtama)) {
+                    $this->diagnosisUtama = trim($this->diagnosisUtama);
 
-                    $existing = Diagnosa::where('nama', $this->diagnosisUtama)->first();
-                    if ($existing) {
-
-                        $this->diagnosisUtama = $existing->id;
+                    if (!empty($this->diagnosisUtama)) {
+                        $existing = Diagnosa::where('nama', $this->diagnosisUtama)->first();
+                        if ($existing) {
+                            $this->diagnosisUtama = $existing->id;
+                        } else {
+                            $diagnosaBaru = Diagnosa::create([
+                                'nama' => $this->diagnosisUtama,
+                                'layanan_id' => $rekmed?->pendaftaran?->layanan_id,
+                            ]);
+                            $this->diagnosisUtama = $diagnosaBaru->id;
+                        }
                     } else {
-                        $diagnosaBaru = Diagnosa::create([
-                            'nama' => $this->diagnosisUtama,
-                            'layanan_id' => $rekmed->pendaftaran->layanan_id,
-                        ]);
-                        $this->diagnosisUtama = $diagnosaBaru->id;
+                        // tidak usah buat diagnosa baru, biarkan id_diagnosa null
+                        $this->diagnosisUtama = null;
                     }
                 }
+
                 // Update jika sudah ada
                 $rekmed->update([
                     'id_pasien' => $this->pasienId,
@@ -132,6 +158,7 @@ class KesehatanUmum extends Component
                     'jadwal_kontrol' => $this->jadwalKontrolUlang,
                     'catatan_tambahan' => $this->catatan,
                     'catatan_jadwal' => $this->catatanJadwal,
+                    'updated_by' => auth()->id()
                 ]);
 
                 // Bersihkan relasi lama
@@ -140,16 +167,25 @@ class KesehatanUmum extends Component
                 $rekmed->resepPasien()->delete();
             } else {
                 if (!is_numeric($this->diagnosisUtama)) {
-                    $existing = Diagnosa::where('nama', $this->diagnosisUtama)->first();
-                    if ($existing) {
-                        $this->diagnosisUtama = $existing->id;
+                    $this->diagnosisUtama = trim($this->diagnosisUtama);
+
+                    if (!empty($this->diagnosisUtama)) {
+                        $existing = Diagnosa::where('nama', $this->diagnosisUtama)->first();
+                        if ($existing) {
+                            $this->diagnosisUtama = $existing->id;
+                        } else {
+                            $diagnosaBaru = Diagnosa::create([
+                                'nama' => $this->diagnosisUtama,
+                                'layanan_id' => $rekmed?->pendaftaran?->layanan_id,
+                            ]);
+                            $this->diagnosisUtama = $diagnosaBaru->id;
+                        }
                     } else {
-                        $diagnosaBaru = Diagnosa::create([
-                            'nama' => $this->diagnosisUtama,
-                        ]);
-                        $this->diagnosisUtama = $diagnosaBaru->id;
+                        // tidak usah buat diagnosa baru, biarkan id_diagnosa null
+                        $this->diagnosisUtama = null;
                     }
                 }
+
                 // Create jika belum ada
                 $rekmed = RekmedUmum::create([
                     'id_pasien' => $this->pasienId,
@@ -178,6 +214,8 @@ class KesehatanUmum extends Component
                     'jadwal_kontrol' => $this->jadwalKontrolUlang,
                     'catatan_tambahan' => $this->catatan,
                     'catatan_jadwal' => $this->catatanJadwal,
+                    'created_by' => auth()->id(),
+                    'updated_by' => auth()->id()
                 ]);
             }
 
@@ -564,10 +602,21 @@ class KesehatanUmum extends Component
 
     public function mount($id)
     {
-        $this->pendaftaran = Pendaftaran::with(['pasien', 'layanan'])->findOrFail($id);
+        $this->pendaftaran = Pendaftaran::with(['pasien', 'layanan', 'layananDetail'])->findOrFail($id);
         $this->pendaftaranId = $id;
         $this->pasienId = $this->pendaftaran->pasien_id;
+        $this->totalKunjungan = Pendaftaran::where('pasien_id', $this->pasienId)
+            ->whereNull('deleted_at')
+            ->whereHas('rekmedUmum') // hanya pendaftaran yang sudah ada rekam medis
+            ->count();
+        $this->riwayatRekmed = RekmedUmum::with(['pendaftaran.layananDetail'])
+            ->whereHas('pendaftaran', fn($q) => $q->where('pasien_id', $this->pasienId))
+            ->whereNull('deleted_at') // jika pakai softdelete
+            ->orderByDesc('created_at')
+            ->get();
+
         $layananId = $this->pendaftaran->layanan_id;
+        $this->adaWaApiAktif = \App\Models\WaApi::where('active', true)->exists();
 
         $this->daftarKeluhan = Keluhan::where('layanan_id', $layananId)
             ->pluck('nama', 'id')
@@ -628,6 +677,8 @@ class KesehatanUmum extends Component
 
     public function render()
     {
-        return view('livewire.pemeriksaan.kesehatan-umum')->extends('layouts.app');
+        return view('livewire.pemeriksaan.kesehatan-umum')->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 }

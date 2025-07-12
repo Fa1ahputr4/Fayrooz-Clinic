@@ -13,9 +13,8 @@ use Carbon\Carbon;
 
 class DashboardIndex extends Component
 {
-
+    public $title = 'Fayrooz | Dashboard';
     public $chartRange = 'today'; // Default set ke hari ini
-
     public $filterOptions = [
         'today' => 'Hari Ini',
         '7' => '7 Hari',
@@ -32,7 +31,9 @@ class DashboardIndex extends Component
             'filterOptions' => $this->filterOptions,
             'totalRekmedUmum' => RekmedUmum::count(),
             'totalRekmedBeautycare' => RekmedBeautycare::count()
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     protected function prepareChartData()

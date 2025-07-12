@@ -4,8 +4,9 @@ namespace App\Livewire\Layanan;
 
 use App\Models\Layanan;
 use Livewire\Component;
-use App\Models\LayananDetail;
 use Livewire\WithPagination;
+use App\Models\LayananDetail;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,6 +14,7 @@ class LayananIndex extends Component
 {
     use WithPagination;
 
+    public $title = 'Fayrooz | Data Layanan';
     public $perPage = 10;
     public $search = '';
     public $sortField = 'created_at';
@@ -31,7 +33,7 @@ class LayananIndex extends Component
     public function render()
     {
         // Ambil data detail layanan dengan relasi kategori
-        $services = LayananDetail::with('layanan')
+        $services = LayananDetail::with('layanan', 'createdBy', 'updatedBy')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('kode_layanan', 'like', '%' . $this->search . '%')
@@ -49,7 +51,9 @@ class LayananIndex extends Component
         return view('livewire.layanan.layanan-menu', [
             'services' => $services,
             'categories' => $categories
-        ])->extends('layouts.app');
+        ])->extends('layouts.app', [
+            'title' => $this->title // Kirim title ke layout
+        ]);
     }
 
     public function updatingSearch()
@@ -125,40 +129,46 @@ class LayananIndex extends Component
 
         $this->validate([
             'layanan_id' => 'required|exists:layanan,id',
-            'kode_layanan' => 'required|string|max:255',
+            'kode_layanan' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('layanan_details')->ignore($this->serviceId)
+            ],
             'nama_layanan' => 'required|string|max:255',
-            'harga_layanan' => 'nullable|integer|min:0',
             'deskripsi_layanan' => 'nullable|string',
-            'is_active' => 'required|boolean'
         ], [
             'layanan_id.required' => 'Jenis layanan wajib dipilih.',
             'layanan_id.exists' => 'Jenis layanan tidak ditemukan di sistem.',
+            'kode_layanan.unique' => 'Kode layanan sudah digunakan.',
             'kode_layanan.required' => 'Kode layanan tidak boleh kosong.',
             'nama_layanan.required' => 'Nama layanan wajib diisi.',
-            'harga_layanan.integer' => 'Harga harus berupa angka.',
-            'harga_layanan.min' => 'Harga minimal adalah 0.',
-            'is_active.required' => 'Status aktif harus diatur.',
         ]);
 
         $data = [
             'layanan_id' => $this->layanan_id,
             'kode_layanan' => $this->kode_layanan,
             'nama_layanan' => $this->nama_layanan,
-            'harga_layanan' => $this->harga_layanan,
             'deskripsi_layanan' => $this->deskripsi_layanan,
-            'is_active' => $this->is_active
         ];
 
         if ($this->serviceId) {
+            $data['updated_by'] = auth()->id();
             LayananDetail::find($this->serviceId)->update($data);
             $message = 'Detail layanan berhasil diperbarui.';
         } else {
+            $data['created_by'] = auth()->id();
+            $data['updated_by'] = auth()->id();
             LayananDetail::create($data);
             $message = 'Detail layanan berhasil ditambahkan.';
         }
 
         $this->dispatch('flash-message', type: 'success', message: $message);
         $this->closeModal();
+    }
+
+    public function updated($propertyName){
+        $this->resetErrorBag($propertyName);
     }
 
     public function deleteService()
